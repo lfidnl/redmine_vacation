@@ -114,6 +114,35 @@ class VacationMessagesControllerTest < Redmine::ControllerTest
     assert_response :success
   end
 
+  def test_autocomplete_users
+    get :autocomplete_users, params: { term: 'vac_intr' }
+    assert_response :success
+    result = JSON.parse(response.body)
+    assert_equal [@other.id], result.map { |u| u['id'] }
+    assert_equal @other.name, result.first['label']
+  end
+
+  def test_autocomplete_users_excludes_owner_and_locked
+    @other.lock!
+    get :autocomplete_users, params: { term: 'vac_' }
+    ids = JSON.parse(response.body).map { |u| u['id'] }
+    assert_not_includes ids, @user.id
+    assert_not_includes ids, @other.id
+  end
+
+  def test_autocomplete_requires_login
+    @request.session[:user_id] = nil
+    get :autocomplete_users, params: { term: 'vac' }
+    assert_response 302
+  end
+
+  def test_edit_shows_substitute_name
+    message = create_message(@user, substitute: @other)
+    get :edit, params: { id: message.id }
+    assert_select "input#vacation_substitute_search[value=?]", @other.name
+    assert_select "input#vacation_message_substitute_id[value=?]", @other.id.to_s
+  end
+
   def test_cannot_edit_or_delete_foreign_message
     message = create_message(@other)
 

@@ -186,6 +186,35 @@
     return start + ' - ' + end;
   }
 
+  // Type-ahead for the substitute, using jQuery UI's autocomplete that ships
+  // with Redmine. Only a suggestion picked from the list sets the hidden id;
+  // free text that matches nobody is cleared when the field loses focus.
+  function initSubstituteSearch(input, hidden, onChange) {
+    if (!input) return;
+
+    input.addEventListener('input', function () {
+      hidden.value = '';
+      onChange();
+    });
+    input.addEventListener('blur', function () {
+      if (!hidden.value) input.value = '';
+      onChange();
+    });
+
+    if (!window.jQuery || !window.jQuery.fn.autocomplete) return;
+    window.jQuery(input).autocomplete({
+      source: input.dataset.url,
+      minLength: 1,
+      delay: 200,
+      select: function (event, ui) {
+        hidden.value = ui.item.id;
+        input.value = ui.item.label;
+        onChange();
+        return false;
+      }
+    });
+  }
+
   function initForm() {
     var form = document.getElementById('vacation-message-form');
     if (!form) return;
@@ -199,6 +228,7 @@
     var dateUntil = field('date_until');
     var appendDates = field('append_dates');
     var substitute = field('substitute_id');
+    var substituteSearch = form.querySelector('.vacation-substitute-search');
     var showBanner = field('show_banner');
     var visibility = field('visibility');
     var recipients = form.querySelectorAll('.vacation-recipients');
@@ -229,9 +259,8 @@
       }
       var template = lead ? previews.dataset.templateUpcoming : previews.dataset.template;
       var line = template.replace('%NAME%', previews.dataset.name).replace('%TEXT%', value);
-      if (substitute.value) {
-        line += ' - ' + previews.dataset.substituteLabel + ': ' +
-                substitute.options[substitute.selectedIndex].text;
+      if (substitute.value && substituteSearch.value) {
+        line += ' - ' + previews.dataset.substituteLabel + ': ' + substituteSearch.value;
       }
       return line;
     }
@@ -273,9 +302,8 @@
       input.addEventListener('input', updatePreview);
       input.addEventListener('change', updatePreview);
     });
-    [appendDates, substitute].forEach(function (input) {
-      input.addEventListener('change', updatePreview);
-    });
+    appendDates.addEventListener('change', updatePreview);
+    initSubstituteSearch(substituteSearch, substitute, updatePreview);
     visibility.addEventListener('change', toggleSections);
     showBanner.addEventListener('change', toggleSections);
 

@@ -29,7 +29,13 @@
     <%= f.check_box :append_dates %>
   </p>
   <p>
-    <%= f.select :substitute_id, vacation_substitute_options(@vacation_message), include_blank: true %>
+    <label for="vacation_substitute_search"><%= l(:field_vacation_substitute_id) %></label>
+    <%# Type-ahead search; the chosen user's id goes into the hidden field. %>
+    <%= text_field_tag 'vacation_substitute_search', @vacation_message.substitute&.name,
+          id: 'vacation_substitute_search', class: 'vacation-substitute-search', size: 30,
+          autocomplete: 'off', placeholder: l(:label_vacation_substitute_placeholder),
+          data: { url: autocomplete_users_vacation_messages_path(user_id: @vacation_message.user_id) } %>
+    <%= f.hidden_field :substitute_id %>
   </p>
   <p>
     <%= f.select :visibility, vacation_visibility_options, {}, class: 'vacation-visibility' %>

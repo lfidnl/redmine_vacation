@@ -44,12 +44,6 @@ module VacationMessagesHelper
     project_tree_options_for_select(projects, selected: message.projects.to_a)
   end
 
-  def vacation_substitute_options(message)
-    users = User.active.sorted.where.not(id: message.user_id).to_a
-    users |= [message.substitute] if message.substitute
-    users.map { |u| [u.name, u.id] }
-  end
-
   # For managers: whose absence is being created.
   def vacation_owner_options(selected)
     options_from_collection_for_select(User.active.sorted, :id, :name, selected&.id)

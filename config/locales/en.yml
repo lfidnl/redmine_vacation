@@ -9,6 +9,7 @@ en:
   label_vacation_banner: "Banner"
   label_vacation_badge: "absent"
   label_vacation_dismiss: "Hide for today"
+  label_vacation_substitute_placeholder: "Type a name…"
   label_vacation_allowed_groups: "Allowed groups"
   label_vacation_manager_groups: "Managing groups"
   label_vacation_hint_days: "Look-ahead when assigning (days)"

@@ -13,7 +13,8 @@ it also runs on Redmine 6.x.
 
 - Create, edit and delete your own absences (from / until / text), split
   into "Current & upcoming" and "Past" tabs
-- **Substitute**: optional user shown (and linked) next to the absence
+- **Substitute**: optional user, picked via type-ahead search, shown (and
+  linked) next to the absence
 - **Visibility** per absence - applies to every place below:
   - everyone (including anonymous visitors)
   - all logged-in users

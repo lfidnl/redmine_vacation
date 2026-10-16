@@ -40,6 +40,7 @@
   set('date_until', '2027-01-10');
   set('text', 'Winterurlaub');
   set('substitute_id', '');
+  document.getElementById('vacation_substitute_search').value = '';
   check('show_banner', true);
   var period = /\(.+ - .+\)$/;
 
@@ -67,17 +68,21 @@
   expectMatch('single day period', text('active'), /\([^-]+\)$/);
   set('date_until', '2027-01-10');
 
-  // Substitute shows up in both previews.
-  var sub = f('substitute_id');
-  if (sub.options.length > 1) {
-    sub.selectedIndex = 1;
-    fire(sub, 'change');
-    var name = sub.options[1].text;
-    set('lead_days', '3');
-    expectMatch('substitute in active', text('active'), new RegExp(name));
-    expectMatch('substitute in lead', text('lead'), new RegExp(name));
-    set('substitute_id', '');
-  }
+  // Substitute: only a suggestion picked from the list counts. Simulated by
+  // setting the hidden id and the visible name like the autocomplete does.
+  var search = document.getElementById('vacation_substitute_search');
+  set('lead_days', '3');
+  f('substitute_id').value = '999';
+  search.value = 'Dana Vertretung';
+  fire(f('append_dates'), 'change');
+  expectMatch('substitute in active', text('active'), /Dana Vertretung/);
+  expectMatch('substitute in lead', text('lead'), /Dana Vertretung/);
+  search.value = 'Dan';
+  fire(search, 'input');
+  expect('typing clears hidden id', f('substitute_id').value, '');
+  expectMatch('typed text without pick not in preview', text('active'), /Dan/, false);
+  fire(search, 'blur');
+  expect('blur without pick clears text', search.value, '');
 
   // Colour applies to both previews.
   set('lead_days', '3');
