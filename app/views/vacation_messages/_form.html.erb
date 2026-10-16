@@ -42,7 +42,11 @@
 <fieldset class="box">
   <legend><%= l(:label_preview) %></legend>
   <div class="flash vacation-message vacation-preview" style="<%= @vacation_message.css_style if @vacation_message.color.to_s.match?(/\A#\h{6}\z/) %>"
-       data-template="<%= l(:text_vacation_banner, name: User.current.name, text: '%TEXT%') %>">
+       data-template="<%= l(:text_vacation_banner, name: User.current.name, text: '%TEXT%') %>"
+       <%# Same format format_date uses, so the preview matches the banner. %>
+       data-date-format="<%= Setting.date_format.presence || ::I18n.t('date.formats.default') %>"
+       data-month-names="<%= ::I18n.t('date.month_names').to_json %>"
+       data-abbr-month-names="<%= ::I18n.t('date.abbr_month_names').to_json %>">
     <%= l(:text_vacation_banner, name: User.current.name, text: @vacation_message.text) %>
   </div>
 </fieldset>
