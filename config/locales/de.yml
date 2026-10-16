@@ -9,6 +9,9 @@ de:
   label_vacation_banner: "Banner"
   label_vacation_badge: "abwesend"
   label_vacation_dismiss: "Für heute ausblenden"
+  label_vacation_block_users: "Personen"
+  label_vacation_welcome_block: "Block auf der Hauptseite"
+  label_vacation_welcome_enabled: "Anzeigen"
   label_vacation_substitute_placeholder: "Name eingeben …"
   label_vacation_allowed_groups: "Erlaubte Gruppen"
   label_vacation_manager_groups: "Verwaltende Gruppen"
@@ -65,9 +68,14 @@ de:
   text_vacation_allowed_groups_info: "Wer eigene Abwesenheiten pflegen darf. Keine Auswahl bedeutet: alle angemeldeten Benutzer. Administratoren dürfen immer."
   text_vacation_manager_groups_info: "Mitglieder dieser Gruppen dürfen Abwesenheiten für alle Benutzer pflegen, z. B. Teamleitungen. Administratoren dürfen immer."
   text_vacation_hint_days_info: "Beim Zuweisen eines Tickets wird auch vor Abwesenheiten gewarnt, die innerhalb dieser Anzahl Tage beginnen. Standard: 14."
+  text_vacation_block_users_info: "Keine Auswahl: alle anstehenden Abwesenheiten. Es erscheinen nur Abwesenheiten, die der jeweilige Betrachter sehen darf."
 
   error_vacation_no_recipients: "Bitte mindestens einen Benutzer oder eine Gruppe als Empfänger auswählen."
   error_vacation_no_projects: "Bitte mindestens ein Projekt auswählen."
 
   permission_view_vacation_overview: "Abwesenheitsübersicht ansehen"
   project_module_vacation_messages: "Abwesenheiten"
+
+  my:
+    blocks:
+      vacation_messages: "Abwesenheiten"

@@ -45,6 +45,29 @@ class VacationOverviewControllerTest < Redmine::ControllerTest
     assert_select 'table.vacation-overview td.text', text: 'Outsider', count: 0
   end
 
+  def test_autocomplete_users
+    get :autocomplete_users, params: { term: 'vac_auth' }
+    assert_response :success
+    result = JSON.parse(response.body)
+    assert_equal [@author.id], result.map { |u| u['id'] }
+    assert_equal @author.name, result.first['label']
+  end
+
+  def test_autocomplete_users_exclude_and_locked
+    @hidden.lock!
+    get :autocomplete_users, params: { term: 'vac_', exclude: @viewer.id }
+    ids = JSON.parse(response.body).map { |u| u['id'] }
+    assert_includes ids, @author.id
+    assert_not_includes ids, @viewer.id
+    assert_not_includes ids, @hidden.id
+  end
+
+  def test_autocomplete_requires_login
+    @request.session[:user_id] = nil
+    get :autocomplete_users, params: { term: 'vac' }
+    assert_response 302
+  end
+
   private
 
   def create_user(login)

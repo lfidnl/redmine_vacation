@@ -112,9 +112,11 @@
     } catch (e) {
       return;
     }
-    var text = hints[select.value];
-    hint.textContent = text || '';
-    hint.hidden = !text;
+    // Only write on change: every write is a DOM mutation, and watchDom()
+    // would otherwise call us again forever.
+    var text = hints[select.value] || '';
+    if (hint.textContent !== text) hint.textContent = text;
+    if (hint.hidden !== !text) hint.hidden = !text;
   }
 
   function initAssigneeHint() {
@@ -125,15 +127,81 @@
     if (window.jQuery) {
       window.jQuery(document)
         .on('change', '#issue_assigned_to_id', updateAssigneeHint)
-        .on('ajaxComplete', function () {
-          updateAssigneeHint();
-          decorateUserLinks();
-        });
+        .on('ajaxComplete', updateAssigneeHint);
     } else {
       document.addEventListener('change', function (event) {
         if (event.target.id === 'issue_assigned_to_id') updateAssigneeHint();
       });
     }
+  }
+
+  // ----------------------------------------------------------- user picker
+
+  // Multi-person picker (My page block, home page setting): picking a
+  // suggestion adds a chip with a hidden input, the x on a chip removes it.
+  // Safe to call repeatedly; My page re-renders blocks via Ajax.
+  function initUserPickers() {
+    if (!window.jQuery || !window.jQuery.fn.autocomplete) return;
+
+    document.querySelectorAll('.vacation-user-picker:not([data-ready])').forEach(function (picker) {
+      picker.dataset.ready = '1';
+      var chips = picker.querySelector('.vacation-user-chips');
+      var search = picker.querySelector('.vacation-user-picker-search');
+
+      function pickedIds() {
+        return Array.prototype.map.call(chips.querySelectorAll('.vacation-user-chip'), function (chip) {
+          return chip.dataset.id;
+        });
+      }
+
+      function addChip(id, name) {
+        var chip = document.createElement('span');
+        chip.className = 'vacation-user-chip';
+        chip.dataset.id = id;
+        chip.appendChild(document.createTextNode(name + ' '));
+
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = picker.dataset.name;
+        input.value = id;
+        chip.appendChild(input);
+
+        var remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'vacation-user-chip-remove';
+        remove.title = picker.dataset.removeLabel;
+        remove.setAttribute('aria-label', picker.dataset.removeLabel);
+        remove.textContent = '\u00d7';
+        chip.appendChild(remove);
+
+        chips.appendChild(chip);
+      }
+
+      chips.addEventListener('click', function (event) {
+        var button = event.target.closest('.vacation-user-chip-remove');
+        if (button) button.closest('.vacation-user-chip').remove();
+      });
+
+      window.jQuery(search).autocomplete({
+        minLength: 1,
+        delay: 200,
+        source: function (request, response) {
+          window.jQuery.getJSON(picker.dataset.url, { term: request.term }, function (users) {
+            var picked = pickedIds();
+            response(users.filter(function (u) { return picked.indexOf(String(u.id)) === -1; }));
+          });
+        },
+        select: function (event, ui) {
+          addChip(ui.item.id, ui.item.label);
+          search.value = '';
+          return false;
+        }
+      });
+      // Enter in the search field must not submit the surrounding form.
+      search.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') event.preventDefault();
+      });
+    });
   }
 
   // ------------------------------------------------------------------ form
@@ -319,10 +387,30 @@
     toggleSections();
   }
 
+  // Redmine replaces parts of the page in several ways (jQuery Ajax for the
+  // issue form, rails-ujs for My page blocks, ...), not all of which fire
+  // jQuery's ajaxComplete. Watching the DOM catches every one of them.
+  function watchDom() {
+    if (!window.MutationObserver) return;
+    var scheduled = false;
+    new MutationObserver(function () {
+      if (scheduled) return;
+      scheduled = true;
+      window.requestAnimationFrame(function () {
+        scheduled = false;
+        decorateUserLinks();
+        initUserPickers();
+        updateAssigneeHint();
+      });
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     placeBanners();
     decorateUserLinks();
     initAssigneeHint();
+    initUserPickers();
     initForm();
+    watchDom();
   });
 })();

@@ -1,0 +1,21 @@
+<%# Multi-person picker: chips with hidden inputs plus a type-ahead field.
+    Locals: name (form field name, without []), users (already selected).
+    The empty hidden input makes "nobody selected" survive a save, because
+    Redmine merges block settings instead of replacing them. %>
+<span class="vacation-user-picker" data-name="<%= name %>[]"
+      data-url="<%= vacation_autocomplete_users_path %>"
+      data-remove-label="<%= l(:button_delete) %>">
+  <%= hidden_field_tag "#{name}[]", '', id: nil %>
+  <span class="vacation-user-chips">
+    <% users.each do |user| %>
+      <span class="vacation-user-chip" data-id="<%= user.id %>">
+        <%= user.name %>
+        <%= hidden_field_tag "#{name}[]", user.id, id: nil %>
+        <button type="button" class="vacation-user-chip-remove"
+                title="<%= l(:button_delete) %>" aria-label="<%= l(:button_delete) %>">&times;</button>
+      </span>
+    <% end %>
+  </span>
+  <%= text_field_tag nil, nil, class: 'vacation-user-picker-search', size: 25, autocomplete: 'off',
+                     placeholder: l(:label_vacation_substitute_placeholder) %>
+</span>

@@ -57,8 +57,12 @@ class VacationMessage < ActiveRecord::Base
   scope :past,      ->(date) { where('date_until < ?', date) }
   scope :with_active_user, -> { joins(:user).where(users: { status: User::STATUS_ACTIVE }) }
 
+  def self.ids_from(values)
+    Array(values).reject(&:blank?).map(&:to_i).uniq
+  end
+
   def self.setting_ids(key)
-    Array(Setting.plugin_redmine_vacation[key]).reject(&:blank?).map(&:to_i)
+    ids_from(Setting.plugin_redmine_vacation[key])
   end
 
   # Admins and members of the manager groups may maintain absences for

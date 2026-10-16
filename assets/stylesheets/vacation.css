@@ -105,3 +105,27 @@ button.vacation-preset {
   border-radius: 3px;
   cursor: pointer;
 }
+
+/* Person picker (My page block, home page setting) */
+.vacation-user-picker { display: inline-block; }
+.vacation-user-chips { display: inline; }
+.vacation-user-chip {
+  display: inline-block;
+  margin: 0 4px 4px 0;
+  padding: 1px 2px 1px 8px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #f4f4f4;
+  white-space: nowrap;
+}
+button.vacation-user-chip-remove {
+  margin-left: 2px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+.vacation-block-scope { font-weight: normal; color: #777; font-size: 0.9em; }
+div.box.vacation-welcome table.list { margin-bottom: 6px; }

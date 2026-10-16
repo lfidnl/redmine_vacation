@@ -1,0 +1,31 @@
+<%# Shared by the overview, the My page block and the home page block.
+    Rendered from several controllers, so only core helpers are used. %>
+<% today = User.current.today %>
+<div class="autoscroll">
+  <table class="list vacation-overview">
+    <thead>
+      <tr>
+        <th><%= l(:field_user) %></th>
+        <th><%= l(:label_vacation_period) %></th>
+        <th><%= l(:field_vacation_text) %></th>
+        <th><%= l(:field_vacation_substitute_id) %></th>
+        <th><%= l(:field_status) %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% messages.each do |message| %>
+        <% active = message.active_on?(today) %>
+        <tr class="<%= 'vacation-active' if active %>">
+          <td class="user"><%= avatar(message.user, size: 16) %> <%= link_to_user message.user %></td>
+          <td class="period"><%= message.period_text %></td>
+          <td class="text"><%= message.text %></td>
+          <td class="substitute"><%= link_to_user(message.substitute) if message.substitute %></td>
+          <td class="status">
+            <%= active ? l(:label_vacation_status_absent) :
+                         l(:label_vacation_status_upcoming, count: (message.date_from - today).to_i) %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

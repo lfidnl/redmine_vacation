@@ -34,7 +34,7 @@
     <%= text_field_tag 'vacation_substitute_search', @vacation_message.substitute&.name,
           id: 'vacation_substitute_search', class: 'vacation-substitute-search', size: 30,
           autocomplete: 'off', placeholder: l(:label_vacation_substitute_placeholder),
-          data: { url: autocomplete_users_vacation_messages_path(user_id: @vacation_message.user_id) } %>
+          data: { url: vacation_autocomplete_users_path(exclude: @vacation_message.user_id) } %>
     <%= f.hidden_field :substitute_id %>
   </p>
   <p>

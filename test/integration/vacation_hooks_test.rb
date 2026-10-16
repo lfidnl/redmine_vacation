@@ -91,7 +91,70 @@ class VacationHooksTest < Redmine::IntegrationTest
     assert_select '#vacation-messages', 0
   end
 
+  def test_my_page_block_lists_all_without_selection
+    other = VacationMessage.create!(user: @deputy, date_from: Date.today + 10, date_until: Date.today + 12,
+                                    text: 'Seminar', color: '#dbeafe', visibility: 'logged')
+    add_my_page_block
+    get '/my/page'
+    assert_select '#block-vacation_messages table.vacation-overview td.text', text: 'Sommerurlaub'
+    assert_select '#block-vacation_messages table.vacation-overview td.text', text: other.text
+    assert_select '#block-vacation_messages .vacation-user-picker'
+  end
+
+  def test_my_page_block_limited_to_selected_people
+    VacationMessage.create!(user: @deputy, date_from: Date.today + 10, date_until: Date.today + 12,
+                            text: 'Seminar', color: '#dbeafe', visibility: 'logged')
+    add_my_page_block
+    post '/my/page', params: { settings: { vacation_messages: { user_ids: ['', @deputy.id.to_s] } } }, xhr: true
+    assert_response :success
+
+    get '/my/page'
+    assert_select '#block-vacation_messages td.text', text: 'Seminar'
+    assert_select '#block-vacation_messages td.text', text: 'Sommerurlaub', count: 0
+    assert_select '#block-vacation_messages .vacation-user-chip', text: /#{@deputy.name}/
+
+    # Removing everybody again (only the empty marker is sent) shows all.
+    post '/my/page', params: { settings: { vacation_messages: { user_ids: [''] } } }, xhr: true
+    get '/my/page'
+    assert_select '#block-vacation_messages td.text', text: 'Sommerurlaub'
+  end
+
+  def test_my_page_block_respects_visibility
+    @message.update!(visibility: 'selected', principal_ids: [@deputy.id])
+    add_my_page_block
+    get '/my/page'
+    assert_select '#block-vacation_messages td.text', text: 'Sommerurlaub', count: 0
+  end
+
+  def test_welcome_block_is_off_by_default
+    get '/'
+    assert_select '.vacation-welcome', 0
+  end
+
+  def test_welcome_block_all_or_selected
+    VacationMessage.create!(user: @deputy, date_from: Date.today + 10, date_until: Date.today + 12,
+                            text: 'Seminar', color: '#dbeafe', visibility: 'logged')
+    with_settings plugin_redmine_vacation: { 'allowed_group_ids' => [], 'welcome_enabled' => '1',
+                                             'welcome_user_ids' => [] } do
+      get '/'
+      assert_select '.vacation-welcome td.text', text: 'Sommerurlaub'
+      assert_select '.vacation-welcome td.text', text: 'Seminar'
+    end
+    with_settings plugin_redmine_vacation: { 'allowed_group_ids' => [], 'welcome_enabled' => '1',
+                                             'welcome_user_ids' => ['', @deputy.id.to_s] } do
+      get '/'
+      assert_select '.vacation-welcome td.text', text: 'Seminar'
+      assert_select '.vacation-welcome td.text', text: 'Sommerurlaub', count: 0
+    end
+  end
+
   private
+
+  def add_my_page_block
+    pref = @viewer.pref
+    pref.my_page_layout = { 'top' => ['vacation_messages'] }
+    pref.save!
+  end
 
   def create_user(login)
     User.create!(login: login, firstname: login, lastname: 'Test',

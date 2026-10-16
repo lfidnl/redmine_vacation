@@ -1,0 +1,14 @@
+<%# Home page block, configured by the admin in the plugin settings. %>
+<% if Setting.plugin_redmine_vacation['welcome_enabled'] == '1' %>
+  <% user_ids = VacationMessage.setting_ids('welcome_user_ids') %>
+  <% messages = VacationMessage.listed_for(User.current, user_ids: user_ids.presence) %>
+  <% if messages.any? %>
+    <div class="box vacation-welcome">
+      <h3 class="icon icon-time"><%= sprite_icon('time', l(:label_vacation_overview)) %></h3>
+      <%= render partial: 'vacation_overview/table', locals: { messages: messages } %>
+      <% if User.current.logged? %>
+        <%= link_to l(:label_vacation_overview), vacation_overview_path %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

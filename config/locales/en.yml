@@ -9,6 +9,9 @@ en:
   label_vacation_banner: "Banner"
   label_vacation_badge: "absent"
   label_vacation_dismiss: "Hide for today"
+  label_vacation_block_users: "People"
+  label_vacation_welcome_block: "Block on the home page"
+  label_vacation_welcome_enabled: "Show"
   label_vacation_substitute_placeholder: "Type a name…"
   label_vacation_allowed_groups: "Allowed groups"
   label_vacation_manager_groups: "Managing groups"
@@ -65,9 +68,14 @@ en:
   text_vacation_allowed_groups_info: "Who may maintain their own absences. No selection means every logged-in user. Administrators always may."
   text_vacation_manager_groups_info: "Members of these groups may maintain absences for every user, e.g. team leads. Administrators always may."
   text_vacation_hint_days_info: "When assigning an issue, also warn about absences starting within this many days. Default: 14."
+  text_vacation_block_users_info: "No selection: all upcoming absences. Only absences the viewer may see are listed."
 
   error_vacation_no_recipients: "Please select at least one user or group as recipient."
   error_vacation_no_projects: "Please select at least one project."
 
   permission_view_vacation_overview: "View absence overview"
   project_module_vacation_messages: "Absences"
+
+  my:
+    blocks:
+      vacation_messages: "Absences"

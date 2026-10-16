@@ -36,11 +36,15 @@ it also runs on Redmine 6.x.
 - **Absence overview** in the main menu (`/vacations`) and, with the module
   "Absences" enabled, as a project tab listing the absences of the project
   members (permission "View absence overview")
+- **My page block** "Absences": add it via "My page -> Add"; under its
+  options pick people via type-ahead, or none for all upcoming absences
+- **Home page block**: switch on under the plugin settings, optionally
+  limited to selected people (none = all upcoming absences)
 - **Managers** (admins and configurable groups) maintain absences for
   everyone, e.g. sick leave entered by a team lead
 - "Show to myself" - off by default
 - Admin settings: who may maintain their own absences, managing groups,
-  look-ahead of the assignee hint
+  look-ahead of the assignee hint, home page block
 - Absences of locked users are hidden
 
 ## Installation

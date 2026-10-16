@@ -7,7 +7,7 @@ Redmine::Plugin.register :redmine_vacation do
   description 'Users maintain their own absences in their account. While an absence ' \
               'is running, a coloured banner, a badge next to the name and a hint ' \
               'when assigning issues inform the audience the user picked.'
-  version     '0.2.0'
+  version     '0.3.0'
   url         'https://github.com/sense-design/redmine_vacation'
   requires_redmine version_or_higher: '6.0.0'
 
@@ -15,7 +15,9 @@ Redmine::Plugin.register :redmine_vacation do
     default: {
       'allowed_group_ids' => [], # empty = every logged-in user may maintain absences
       'manager_group_ids' => [], # may maintain absences for everyone (admins always may)
-      'hint_days'         => '14' # how far ahead the assignee hint looks
+      'hint_days'         => '14', # how far ahead the assignee hint looks
+      'welcome_enabled'   => '0',  # absence block on the home page
+      'welcome_user_ids'  => []    # empty = everyone with an upcoming absence
     },
     partial: 'settings/redmine_vacation_settings'
   )

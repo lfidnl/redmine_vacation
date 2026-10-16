@@ -3,7 +3,7 @@ class VacationMessagesController < ApplicationController
 
   before_action :require_login
   before_action :authorize_vacation_messages
-  before_action :find_owner, only: [:index, :new, :create, :autocomplete_users]
+  before_action :find_owner, only: [:index, :new, :create]
   before_action :find_vacation_message, only: [:edit, :update, :destroy]
 
   helper :vacation_messages
@@ -52,14 +52,6 @@ class VacationMessagesController < ApplicationController
     @vacation_message.destroy
     flash[:notice] = l(:notice_successful_delete)
     redirect_to list_path
-  end
-
-  # Substitute search: active users the current user may see (Redmine's
-  # users_visibility), without the absent person themselves.
-  def autocomplete_users
-    users = User.active.visible.like(params[:term].to_s)
-                .where.not(id: @owner.id).sorted.limit(20)
-    render json: users.map { |u| { id: u.id, label: u.name, value: u.name } }
   end
 
   private

@@ -1,0 +1,41 @@
+<%# My page block. Locals from Redmine: user, settings, block. Rendered by
+    MyController, so only core helpers are available. %>
+<% user_ids = VacationMessage.ids_from(settings[:user_ids] || settings['user_ids']) %>
+<% messages = VacationMessage.listed_for(User.current, user_ids: user_ids.presence) %>
+<% picked = User.where(id: user_ids).sorted.to_a %>
+
+<div class="contextual">
+  <%= link_to_function sprite_icon('settings', l(:label_options)),
+                       "$('##{block}-settings').toggle();",
+                       class: 'icon-only icon-settings', title: l(:label_options) %>
+</div>
+
+<h3>
+  <%= link_to l(:label_vacation_overview), vacation_overview_path %>
+  <% if picked.any? %>
+    <span class="vacation-block-scope">(<%= picked.map(&:name).join(', ') %>)</span>
+  <% end %>
+</h3>
+
+<div id="<%= block %>-settings" style="display:none;">
+  <%= form_tag(my_page_path, remote: true) do %>
+    <div class="box">
+      <p>
+        <label><%= l(:label_vacation_block_users) %></label>
+        <%= render partial: 'vacation_messages/user_picker',
+                   locals: { name: "settings[#{block}][user_ids]", users: picked } %>
+        <br><em class="info"><%= l(:text_vacation_block_users_info) %></em>
+      </p>
+    </div>
+    <p>
+      <%= submit_tag l(:button_save) %>
+      <%= link_to_function l(:button_cancel), "$('##{block}-settings').toggle();" %>
+    </p>
+  <% end %>
+</div>
+
+<% if messages.any? %>
+  <%= render partial: 'vacation_overview/table', locals: { messages: messages } %>
+<% else %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>

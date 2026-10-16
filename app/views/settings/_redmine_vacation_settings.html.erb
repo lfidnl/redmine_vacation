@@ -27,3 +27,19 @@
     <em class="info"><%= l(:text_vacation_hint_days_info) %></em>
   </p>
 </div>
+
+<fieldset class="box tabular">
+  <legend><%= l(:label_vacation_welcome_block) %></legend>
+  <p>
+    <label><%= l(:label_vacation_welcome_enabled) %></label>
+    <%= hidden_field_tag 'settings[welcome_enabled]', '0', id: nil %>
+    <%= check_box_tag 'settings[welcome_enabled]', '1', @settings['welcome_enabled'] == '1' %>
+  </p>
+  <p>
+    <label><%= l(:label_vacation_block_users) %></label>
+    <%= render partial: 'vacation_messages/user_picker',
+               locals: { name: 'settings[welcome_user_ids]',
+                         users: User.where(id: VacationMessage.ids_from(@settings['welcome_user_ids'])).sorted.to_a } %>
+    <br><em class="info"><%= l(:text_vacation_block_users_info) %></em>
+  </p>
+</fieldset>

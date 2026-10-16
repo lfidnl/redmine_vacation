@@ -14,6 +14,9 @@ module RedmineVacation
     render_on :view_issues_form_details_bottom, partial: 'vacation_messages/assignee_hint_form'
     render_on :view_issues_show_details_bottom, partial: 'vacation_messages/assignee_hint_show'
 
+    # Optional block on the home page (plugin setting).
+    render_on :view_welcome_index_right,        partial: 'vacation_messages/welcome'
+
     # Absences on the user's profile page.
     render_on :view_account_left_bottom,        partial: 'vacation_messages/user_profile'
   end
