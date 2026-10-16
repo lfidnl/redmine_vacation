@@ -8,22 +8,29 @@
         <tr>
           <th><%= l(:label_vacation_period) %></th>
           <th><%= l(:field_vacation_text) %></th>
+          <th><%= l(:field_vacation_substitute_id) %></th>
           <th><%= l(:label_vacation_visible_for) %></th>
-          <th><%= l(:field_vacation_show_to_self) %></th>
+          <th><%= l(:label_vacation_banner) %></th>
           <th></th>
         </tr>
       </thead>
       <tbody>
         <% today = User.current.today %>
         <% messages.each do |message| %>
-          <tr class="<%= 'vacation-active' if message.date_from <= today && message.date_until >= today %>">
+          <tr class="<%= 'vacation-active' if message.active_on?(today) %>">
             <td class="period"><%= vacation_period(message) %></td>
             <td class="text">
               <span class="vacation-swatch" style="<%= message.css_style %>"></span>
               <%= message.text %>
             </td>
+            <td class="substitute"><%= link_to_user(message.substitute) if message.substitute %></td>
             <td class="visibility"><%= vacation_visibility_summary(message) %></td>
-            <td class="show-to-self"><%= checked_image message.show_to_self? %></td>
+            <td class="banner">
+              <%= checked_image message.show_banner? %>
+              <% if message.show_banner? && message.lead_days > 0 %>
+                <span class="vacation-lead"><%= l(:label_vacation_lead_short, count: message.lead_days) %></span>
+              <% end %>
+            </td>
             <td class="buttons">
               <%= link_to sprite_icon('edit', l(:button_edit)), edit_vacation_message_path(message), class: 'icon icon-edit' %>
               <%= link_to sprite_icon('del', l(:button_delete)), vacation_message_path(message),

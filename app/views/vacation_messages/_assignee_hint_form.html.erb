@@ -1,0 +1,9 @@
+<%# Hidden until vacation.js sees an absent user selected as assignee. %>
+<%
+  today = User.current.today
+  hints = VacationMessage.assignee_hints_for(User.current)
+                         .transform_values { |message| message.hint_text(today) }
+%>
+<% if hints.any? %>
+  <div class="flash warning vacation-assignee-hint" data-hints="<%= hints.to_json %>" hidden></div>
+<% end %>

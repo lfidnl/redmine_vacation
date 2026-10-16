@@ -1,8 +1,34 @@
 (function () {
   'use strict';
 
+  // ---------------------------------------------------------------- banner
+
+  var DISMISS_KEY = 'redmine_vacation.dismissed';
+
+  function localToday() {
+    var d = new Date();
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  }
+
+  // Browser storage can be missing or throw (private mode, blocked site
+  // data); dismissing then simply lasts until the next page load.
+  function readDismissed() {
+    try {
+      return JSON.parse(window.localStorage.getItem(DISMISS_KEY)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function writeDismissed(map) {
+    try {
+      window.localStorage.setItem(DISMISS_KEY, JSON.stringify(map));
+    } catch (e) { /* ignore */ }
+  }
+
   // Move the banners from the end of #content (where the hook renders them)
-  // to the top, right below Redmine's own flash messages.
+  // to the top, right below Redmine's own flash messages, and hide the ones
+  // dismissed today.
   function placeBanners() {
     var box = document.getElementById('vacation-messages');
     var content = document.getElementById('content');
@@ -11,7 +37,106 @@
     var flashes = content.querySelectorAll(':scope > .flash');
     var anchor = flashes.length ? flashes[flashes.length - 1].nextSibling : content.firstChild;
     content.insertBefore(box, anchor);
+
+    var today = localToday();
+    var dismissed = readDismissed();
+    // Forget entries from earlier days so storage does not grow forever.
+    Object.keys(dismissed).forEach(function (key) {
+      if (dismissed[key] !== today) delete dismissed[key];
+    });
+    writeDismissed(dismissed);
+
+    box.querySelectorAll('.vacation-message[data-dismiss-key]').forEach(function (banner) {
+      var key = banner.dataset.dismissKey;
+      if (dismissed[key] === today) banner.remove();
+
+      var button = banner.querySelector('.vacation-dismiss');
+      if (!button) return;
+      button.addEventListener('click', function () {
+        var map = readDismissed();
+        map[key] = localToday();
+        writeDismissed(map);
+        banner.remove();
+      });
+    });
   }
+
+  // ---------------------------------------------------------------- badges
+
+  // Put a small "absent" badge next to every link to a user who is absent
+  // today (issue lists, issue details, journals, ...).
+  function decorateUserLinks() {
+    var data = document.getElementById('vacation-absent-users');
+    if (!data) return;
+
+    var absent;
+    try {
+      absent = JSON.parse(data.textContent);
+    } catch (e) {
+      return;
+    }
+    var label = data.dataset.label;
+
+    document.querySelectorAll('a.user[href]').forEach(function (link) {
+      if (link.dataset.vacationBadge) return;
+      if (link.closest('#vacation-messages')) return;
+
+      var m = /\/users\/(\d+)(?:[?#].*)?$/.exec(link.getAttribute('href'));
+      if (!m || !absent[m[1]]) return;
+
+      var badge = document.createElement('span');
+      badge.className = 'vacation-badge';
+      badge.textContent = label;
+      badge.title = absent[m[1]];
+      link.insertAdjacentElement('afterend', badge);
+      link.dataset.vacationBadge = '1';
+    });
+  }
+
+  // ---------------------------------------------------------- assignee hint
+
+  function updateAssigneeHint() {
+    var hint = document.querySelector('.vacation-assignee-hint[data-hints]');
+    var select = document.getElementById('issue_assigned_to_id');
+    if (!hint || !select) return;
+
+    // Show the hint right below the assignee field.
+    var field = select.closest('p');
+    if (field && hint.previousElementSibling !== field) {
+      field.insertAdjacentElement('afterend', hint);
+    }
+
+    var hints;
+    try {
+      hints = JSON.parse(hint.dataset.hints);
+    } catch (e) {
+      return;
+    }
+    var text = hints[select.value];
+    hint.textContent = text || '';
+    hint.hidden = !text;
+  }
+
+  function initAssigneeHint() {
+    updateAssigneeHint();
+    // jQuery catches both native changes and the ones Redmine triggers
+    // itself (e.g. "Assign to me"); the issue form is also re-rendered via
+    // Ajax when tracker or status change.
+    if (window.jQuery) {
+      window.jQuery(document)
+        .on('change', '#issue_assigned_to_id', updateAssigneeHint)
+        .on('ajaxComplete', function () {
+          updateAssigneeHint();
+          decorateUserLinks();
+        });
+    } else {
+      document.addEventListener('change', function (event) {
+        if (event.target.id === 'issue_assigned_to_id') updateAssigneeHint();
+      });
+    }
+  }
+
+  // ------------------------------------------------------------------ form
 
   function hexToRgb(hex) {
     var m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
@@ -52,7 +177,7 @@
     });
   }
 
-  // Mirrors the period suffix built in _banner.html.erb.
+  // Mirrors VacationMessage#period_text.
   function period(from, until, el) {
     var start = formatDate(from, el);
     var end = formatDate(until, el);
@@ -65,24 +190,37 @@
     var form = document.getElementById('vacation-message-form');
     if (!form) return;
 
-    var color = form.querySelector('#vacation_message_color');
-    var text = form.querySelector('#vacation_message_text');
-    var dateFrom = form.querySelector('#vacation_message_date_from');
-    var dateUntil = form.querySelector('#vacation_message_date_until');
-    var appendDates = form.querySelector('#vacation_message_append_dates');
-    var visibility = form.querySelector('#vacation_message_visibility');
+    function field(name) { return form.querySelector('#vacation_message_' + name); }
+
+    var owner = field('user_id');
+    var color = field('color');
+    var text = field('text');
+    var dateFrom = field('date_from');
+    var dateUntil = field('date_until');
+    var appendDates = field('append_dates');
+    var substitute = field('substitute_id');
+    var showBanner = field('show_banner');
+    var visibility = field('visibility');
     var recipients = form.querySelectorAll('.vacation-recipients');
     var projects = form.querySelectorAll('.vacation-projects');
-    var preview = document.querySelector('.vacation-preview');
+    var bannerOptions = form.querySelectorAll('.vacation-banner-options');
+    var preview = form.querySelector('.vacation-preview');
 
+    // Mirrors _banner.html.erb: the period is always shown in the lead time.
     function updatePreview() {
-      if (!preview) return;
+      var upcoming = dateFrom.value && dateFrom.value > preview.dataset.today;
       var value = text.value;
-      if (appendDates.checked) {
+      if (appendDates.checked || upcoming) {
         var p = period(dateFrom.value, dateUntil.value, preview);
         if (p) value += ' (' + p + ')';
       }
-      preview.textContent = preview.dataset.template.replace('%TEXT%', value);
+      var template = upcoming ? preview.dataset.templateUpcoming : preview.dataset.template;
+      var line = template.replace('%NAME%', preview.dataset.name).replace('%TEXT%', value);
+      if (substitute.value) {
+        line += ' - ' + preview.dataset.substituteLabel + ': ' +
+                substitute.options[substitute.selectedIndex].text;
+      }
+      preview.textContent = line;
       applyColor(preview, color.value);
     }
 
@@ -90,9 +228,10 @@
       elements.forEach(function (el) { el.style.display = visible ? '' : 'none'; });
     }
 
-    function toggleRecipients() {
+    function toggleSections() {
       toggle(recipients, visibility.value === 'selected');
       toggle(projects, visibility.value === 'project_members');
+      toggle(bannerOptions, showBanner.checked);
     }
 
     form.querySelectorAll('.vacation-preset').forEach(function (button) {
@@ -101,22 +240,33 @@
         updatePreview();
       });
     });
-    color.addEventListener('input', updatePreview);
-    text.addEventListener('input', updatePreview);
-    // "change" as well: the Redmine datepicker sets the value programmatically.
-    [dateFrom, dateUntil].forEach(function (input) {
+    [color, text, dateFrom, dateUntil].forEach(function (input) {
+      // "change" as well: the Redmine datepicker sets values programmatically.
       input.addEventListener('input', updatePreview);
       input.addEventListener('change', updatePreview);
     });
-    appendDates.addEventListener('change', updatePreview);
-    visibility.addEventListener('change', toggleRecipients);
+    [appendDates, substitute].forEach(function (input) {
+      input.addEventListener('change', updatePreview);
+    });
+    visibility.addEventListener('change', toggleSections);
+    showBanner.addEventListener('change', toggleSections);
+
+    // Managers: project, recipient and substitute choices depend on the
+    // person, so switching it reloads the form for that person.
+    if (owner) {
+      owner.addEventListener('change', function () {
+        window.location.search = '?user_id=' + encodeURIComponent(owner.value);
+      });
+    }
 
     updatePreview();
-    toggleRecipients();
+    toggleSections();
   }
 
   document.addEventListener('DOMContentLoaded', function () {
     placeBanners();
+    decorateUserLinks();
+    initAssigneeHint();
     initForm();
   });
 })();

@@ -82,6 +82,38 @@ class VacationMessagesControllerTest < Redmine::ControllerTest
     assert_equal 'Urlaub', message.text
   end
 
+  def test_create_with_substitute_and_lead_time
+    post :create, params: { vacation_message: {
+      date_from: '2026-07-24', date_until: '2026-07-24', text: 'X', color: '#ffe3e3',
+      visibility: 'logged', substitute_id: @other.id.to_s, lead_days: '3', show_banner: '0'
+    } }
+    message = VacationMessage.last
+    assert_equal @other, message.substitute
+    assert_equal 3, message.lead_days
+    assert_equal Date.new(2026, 7, 21), message.display_from
+    assert_not message.show_banner?
+    assert_equal @user, message.author
+  end
+
+  def test_manager_creates_and_edits_for_others
+    @user.update!(admin: true)
+    post :create, params: { vacation_message: {
+      user_id: @other.id, date_from: '2026-07-24', date_until: '2026-07-24',
+      text: 'Krank', color: '#ffe3e3', visibility: 'logged'
+    } }
+    assert_redirected_to "/my/vacation_messages?user_id=#{@other.id}"
+    message = VacationMessage.last
+    assert_equal @other, message.user
+    assert_equal @user, message.author
+
+    get :index, params: { user_id: @other.id }
+    assert_response :success
+    assert_select 'table.vacation-messages td.text', text: /Krank/
+
+    get :edit, params: { id: message.id }
+    assert_response :success
+  end
+
   def test_cannot_edit_or_delete_foreign_message
     message = create_message(@other)
 

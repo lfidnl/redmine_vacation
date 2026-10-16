@@ -113,6 +113,75 @@ class VacationMessageTest < ActiveSupport::TestCase
     assert_equal [open.id], message.project_ids
   end
 
+  def test_lead_days_show_banner_ahead
+    today = @viewer.today
+    soon = build_message(date_from: today + 3, date_until: today + 5, lead_days: 5)
+    soon.save!
+    assert_equal today - 2, soon.display_from
+    assert_equal [soon], VacationMessage.displayed_for(@viewer)
+
+    VacationMessage::Current.reset
+    soon.update!(lead_days: 2)
+    assert_empty VacationMessage.displayed_for(@viewer)
+  end
+
+  def test_banner_text_always_has_period_during_lead_time
+    today = @viewer.today
+    message = build_message(date_from: today + 2, date_until: today + 2, append_dates: false)
+    assert_match(/\(/, message.banner_text(today))
+    assert_equal 'Urlaub', message.banner_text(today + 2)
+  end
+
+  def test_hidden_banner_still_counts_as_absent
+    today = @viewer.today
+    message = build_message(date_from: today, date_until: today, show_banner: false)
+    message.save!
+    assert_empty VacationMessage.displayed_for(@viewer)
+    assert_equal [message], VacationMessage.absent_today_for(@viewer)
+  end
+
+  def test_assignee_hints_respect_hint_days
+    today = @viewer.today
+    Setting.plugin_redmine_vacation = { 'allowed_group_ids' => [], 'hint_days' => '10' }
+    build_message(date_from: today + 9, date_until: today + 12).save!
+    build_message(user: @other, date_from: today + 11, date_until: today + 12).save!
+
+    hints = VacationMessage.assignee_hints_for(@viewer)
+    assert_equal [@author.id], hints.keys
+  end
+
+  def test_hint_text_mentions_substitute
+    message = build_message(substitute: @other)
+    assert_includes message.hint_text(message.date_from), @other.name
+  end
+
+  def test_substitute_must_not_be_the_owner
+    assert_not build_message(substitute: @author).valid?
+    assert build_message(substitute: @viewer).valid?
+  end
+
+  def test_lead_days_range
+    assert_not build_message(lead_days: -1).valid?
+    assert_not build_message(lead_days: VacationMessage::MAX_LEAD_DAYS + 1).valid?
+  end
+
+  def test_manager_via_group
+    group = Group.create!(lastname: 'Vacation managers')
+    group.users << @viewer
+    Setting.plugin_redmine_vacation = { 'allowed_group_ids' => [], 'manager_group_ids' => [group.id.to_s] }
+
+    assert VacationMessage.manager?(@viewer)
+    assert_not VacationMessage.manager?(@author)
+  end
+
+  def test_listed_for_includes_own_and_hidden_banner_messages
+    today = @viewer.today
+    own = build_message(date_from: today + 30, date_until: today + 31, show_banner: false)
+    own.save!
+    assert_equal [own], VacationMessage.listed_for(@author)
+    assert_equal [own], VacationMessage.listed_for(@viewer)
+  end
+
   def test_displayed_for_only_returns_running_messages
     today = @viewer.today
     running = build_message(date_from: today - 1, date_until: today + 1)

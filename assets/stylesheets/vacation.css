@@ -1,6 +1,8 @@
 /* Banner: plain .flash box, colours come from an inline style. */
 div.flash.vacation-message {
+  position: relative;
   padding-left: 10px;
+  padding-right: 32px;
   background-image: none;
 }
 
@@ -8,10 +10,59 @@ div.flash.vacation-message {
   margin-bottom: 12px;
 }
 
-/* List */
-table.vacation-messages td.period { white-space: nowrap; }
-table.vacation-messages td.text   { text-align: left; }
-table.vacation-messages tr.vacation-active td { font-weight: bold; }
+div.flash.vacation-message a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+button.vacation-dismiss {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 18px;
+  line-height: 22px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+button.vacation-dismiss:hover,
+button.vacation-dismiss:focus { opacity: 1; }
+
+/* Badge next to user links */
+.vacation-badge {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: #ffebc1;
+  color: #6b4e00;
+  font-size: 0.8em;
+  line-height: 1.5;
+  vertical-align: baseline;
+  cursor: help;
+}
+
+/* Assignee hint inside the issue form / details */
+div.flash.vacation-assignee-hint {
+  margin: 6px 0;
+}
+
+/* Lists */
+table.vacation-messages td.period,
+table.vacation-overview td.period { white-space: nowrap; }
+table.vacation-messages td.text,
+table.vacation-overview td.text,
+table.vacation-overview td.user   { text-align: left; }
+table.vacation-messages tr.vacation-active td,
+table.vacation-overview tr.vacation-active td { font-weight: bold; }
+.vacation-lead { color: #777; font-size: 0.9em; }
 
 .vacation-swatch {
   display: inline-block;
@@ -23,12 +74,23 @@ table.vacation-messages tr.vacation-active td { font-weight: bold; }
   border-radius: 2px;
 }
 
+.vacation-profile li.vacation-active { font-weight: bold; }
+
+form.vacation-owner-filter { margin-bottom: 1em; }
+
 /* Form */
 #vacation-message-form input.vacation-color {
   width: 48px;
   height: 24px;
   padding: 0 2px;
   vertical-align: middle;
+}
+
+#vacation-message-form select[multiple] { min-width: 250px; }
+
+#vacation-message-form .vacation-preview {
+  display: block;
+  margin: 0;
 }
 
 .vacation-presets { margin-left: 8px; }
@@ -43,5 +105,3 @@ button.vacation-preset {
   border-radius: 3px;
   cursor: pointer;
 }
-
-#vacation-message-form select[multiple] { min-width: 250px; }

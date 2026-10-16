@@ -1,0 +1,17 @@
+<% messages = VacationMessage.listed_for(User.current, user_ids: [user.id]) %>
+<% if messages.any? %>
+  <% today = User.current.today %>
+  <div class="vacation-profile">
+    <h3><%= l(:label_vacation_messages) %></h3>
+    <ul>
+      <% messages.each do |message| %>
+        <li class="<%= 'vacation-active' if message.active_on?(today) %>">
+          <%= message.period_text %>: <%= message.text %>
+          <% if message.substitute %>
+            (<%= l(:field_vacation_substitute_id) %>: <%= link_to_user message.substitute %>)
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

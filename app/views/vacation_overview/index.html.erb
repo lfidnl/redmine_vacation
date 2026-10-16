@@ -1,0 +1,43 @@
+<div class="contextual">
+  <% if VacationMessage.manageable_by?(User.current) %>
+    <%= link_to sprite_icon('time', l(:label_vacation_messages)), vacation_messages_path, class: 'icon icon-time' %>
+  <% end %>
+</div>
+
+<h2><%= l(:label_vacation_overview) %></h2>
+
+<% if @messages.empty? %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% else %>
+  <% today = User.current.today %>
+  <div class="autoscroll">
+    <table class="list vacation-overview">
+      <thead>
+        <tr>
+          <th><%= l(:field_user) %></th>
+          <th><%= l(:label_vacation_period) %></th>
+          <th><%= l(:field_vacation_text) %></th>
+          <th><%= l(:field_vacation_substitute_id) %></th>
+          <th><%= l(:field_status) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @messages.each do |message| %>
+          <% active = message.active_on?(today) %>
+          <tr class="<%= 'vacation-active' if active %>">
+            <td class="user"><%= avatar(message.user, size: 16) %> <%= link_to_user message.user %></td>
+            <td class="period"><%= message.period_text %></td>
+            <td class="text"><%= message.text %></td>
+            <td class="substitute"><%= link_to_user(message.substitute) if message.substitute %></td>
+            <td class="status">
+              <%= active ? l(:label_vacation_status_absent) :
+                           l(:label_vacation_status_upcoming, count: (message.date_from - today).to_i) %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
+
+<% html_title l(:label_vacation_overview) %>

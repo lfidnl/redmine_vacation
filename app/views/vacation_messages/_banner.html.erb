@@ -1,18 +1,19 @@
 <%# Rendered through a hook, so only core helpers are available here. %>
+<% today = User.current.today %>
 <% messages = VacationMessage.displayed_for(User.current) %>
 <% if messages.any? %>
   <div id="vacation-messages">
     <% messages.each do |message| %>
-      <%
-        text = message.text
-        if message.append_dates?
-          period = message.single_day? ? format_date(message.date_from) :
-                     "#{format_date(message.date_from)} - #{format_date(message.date_until)}"
-          text = "#{text} (#{period})"
-        end
-      %>
-      <div class="flash vacation-message" style="<%= message.css_style %>">
-        <%= l(:text_vacation_banner, name: message.user.name, text: text) %>
+      <div class="flash vacation-message" style="<%= message.css_style %>"
+           data-dismiss-key="<%= message.dismiss_key %>">
+        <button type="button" class="vacation-dismiss"
+                title="<%= l(:label_vacation_dismiss) %>"
+                aria-label="<%= l(:label_vacation_dismiss) %>">&times;</button>
+        <%= l(message.active_on?(today) ? :text_vacation_banner : :text_vacation_banner_upcoming,
+              name: message.user.name, text: message.banner_text(today)) %>
+        <% if message.substitute %>
+          - <%= l(:field_vacation_substitute_id) %>: <%= link_to_user message.substitute %>
+        <% end %>
       </div>
     <% end %>
   </div>

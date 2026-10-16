@@ -1,0 +1,7 @@
+<% message = issue.assigned_to_id && !issue.closed? &&
+             VacationMessage.assignee_hints_for(User.current)[issue.assigned_to_id] %>
+<% if message %>
+  <div class="flash warning vacation-assignee-hint">
+    <%= message.hint_text(User.current.today) %>
+  </div>
+<% end %>

@@ -1,9 +1,23 @@
 <div class="contextual">
-  <%= link_to sprite_icon('add', l(:label_vacation_message_new)), new_vacation_message_path, class: 'icon icon-add' %>
+  <%= link_to sprite_icon('add', l(:label_vacation_message_new)),
+        (@owner == User.current ? new_vacation_message_path : new_vacation_message_path(user_id: @owner.id)),
+        class: 'icon icon-add' %>
+  <%= link_to sprite_icon('time', l(:label_vacation_overview)), vacation_overview_path, class: 'icon icon-time' %>
   <%= link_to sprite_icon('user', l(:label_my_account)), my_account_path, class: 'icon icon-user' %>
 </div>
 
-<h2><%= l(:label_vacation_messages) %></h2>
+<h2>
+  <%= l(:label_vacation_messages) %>
+  <% if @owner != User.current %>&#187; <%= @owner.name %><% end %>
+</h2>
+
+<% if manager? %>
+  <%= form_tag vacation_messages_path, method: :get, class: 'vacation-owner-filter' do %>
+    <label for="vacation_owner"><%= l(:field_vacation_user) %>:</label>
+    <%= select_tag 'user_id', vacation_owner_options(@owner), id: 'vacation_owner' %>
+    <%= submit_tag l(:button_apply), name: nil %>
+  <% end %>
+<% end %>
 
 <p><em class="info"><%= l(:text_vacation_messages_info) %></em></p>
 

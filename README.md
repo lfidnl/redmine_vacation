@@ -11,21 +11,36 @@ it also runs on Redmine 6.x.
 
 ## Features
 
-- Create, edit and delete your own absences (from / until / text)
-- Colour per absence: colour picker plus presets (red, yellow, green, blue,
-  grey); border and text colour are derived automatically
-- Optionally append the period to the text automatically
-- Visibility per absence:
+- Create, edit and delete your own absences (from / until / text), split
+  into "Current & upcoming" and "Past" tabs
+- **Substitute**: optional user shown (and linked) next to the absence
+- **Visibility** per absence - applies to every place below:
   - everyone (including anonymous visitors)
   - all logged-in users
   - members of projects you share with the author
   - members of selected projects, optionally including their subprojects
     (only projects you can see are offered; archived ones are ignored)
   - selected users and/or groups
-- "Show to myself" - off by default, so you do not see your own banner
-- Tabs "Current & upcoming" / "Past"
-- Admin setting: which groups may maintain absences (empty = everyone)
-- Banners of locked users are hidden
+- **Banner** on top of every page (optional per absence)
+  - colour picker plus presets; border and text colour are derived
+  - optional lead time: show the banner X days before the absence starts
+  - optionally append the period to the text (always shown in lead time)
+  - each viewer can hide a banner for the rest of the day (stored in the
+    browser; comes back when the absence is edited)
+- **Assignee hint**: assigning an issue to someone who is absent, or whose
+  absence starts within the next 14 days (configurable), shows a warning
+  in the issue form; the issue page shows it for the current assignee
+- **Badge** "absent" next to every link to a user who is absent today
+  (issue lists, journals, ...); absences are also listed on the user profile
+- **Absence overview** in the main menu (`/vacations`) and, with the module
+  "Absences" enabled, as a project tab listing the absences of the project
+  members (permission "View absence overview")
+- **Managers** (admins and configurable groups) maintain absences for
+  everyone, e.g. sick leave entered by a team lead
+- "Show to myself" - off by default
+- Admin settings: who may maintain their own absences, managing groups,
+  look-ahead of the assignee hint
+- Absences of locked users are hidden
 
 ## Installation
 
@@ -49,6 +64,8 @@ RAILS_ENV=production bundle exec rake redmine:plugins:migrate NAME=redmine_vacat
 - Account menu (top right) -> **Absences**
 - **My account** -> contextual link **Absences**
 - Direct URL: `/my/vacation_messages`
+- Overview: main menu **Absence overview** (`/vacations`), project tab after
+  enabling the module **Absences**
 - Settings: **Administration -> Plugins -> Vacation Messages -> Configure**
 
 Redmine's "My account" page has no tab API, so the plugin brings its own page

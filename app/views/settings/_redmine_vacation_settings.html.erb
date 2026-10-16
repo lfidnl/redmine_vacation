@@ -6,7 +6,24 @@
           options_from_collection_for_select(
             Group.givable.sorted, :id, :name,
             Array(@settings['allowed_group_ids']).map(&:to_s)),
-          multiple: true, size: 10 %>
+          multiple: true, size: 8 %>
     <em class="info"><%= l(:text_vacation_allowed_groups_info) %></em>
+  </p>
+
+  <p>
+    <label><%= l(:label_vacation_manager_groups) %></label>
+    <%= hidden_field_tag 'settings[manager_group_ids][]', '', id: nil %>
+    <%= select_tag 'settings[manager_group_ids][]',
+          options_from_collection_for_select(
+            Group.givable.sorted, :id, :name,
+            Array(@settings['manager_group_ids']).map(&:to_s)),
+          multiple: true, size: 8 %>
+    <em class="info"><%= l(:text_vacation_manager_groups_info) %></em>
+  </p>
+
+  <p>
+    <label><%= l(:label_vacation_hint_days) %></label>
+    <%= number_field_tag 'settings[hint_days]', @settings['hint_days'], min: 1, max: 365, size: 4 %>
+    <em class="info"><%= l(:text_vacation_hint_days_info) %></em>
   </p>
 </div>

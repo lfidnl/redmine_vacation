@@ -1,2 +1,12 @@
 <%= stylesheet_link_tag 'vacation', plugin: 'redmine_vacation' %>
 <%= javascript_include_tag 'vacation', plugin: 'redmine_vacation' %>
+<%
+  today  = User.current.today
+  absent = VacationMessage.absent_today_for(User.current)
+                          .to_h { |message| [message.user_id, message.hint_text(today)] }
+%>
+<% if absent.any? %>
+  <%# Read by vacation.js to put a badge next to every link to these users. %>
+  <script type="application/json" id="vacation-absent-users"
+          data-label="<%= l(:label_vacation_badge) %>"><%= json_escape(absent.to_json).html_safe %></script>
+<% end %>

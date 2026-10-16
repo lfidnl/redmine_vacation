@@ -3,27 +3,28 @@ class VacationMessagesController < ApplicationController
 
   before_action :require_login
   before_action :authorize_vacation_messages
+  before_action :find_owner, only: [:index, :new, :create]
   before_action :find_vacation_message, only: [:edit, :update, :destroy]
 
   helper :vacation_messages
 
   def index
     today = User.current.today
-    scope = VacationMessage.where(user_id: User.current.id).includes(:principals)
+    scope = VacationMessage.where(user_id: @owner.id).includes(:principals, :projects, :substitute)
     @upcoming = scope.upcoming(today).sorted.to_a
     @past     = scope.past(today).order(date_from: :desc).to_a
   end
 
   def new
-    @vacation_message = VacationMessage.new(user: User.current)
+    @vacation_message = VacationMessage.new(user: @owner)
   end
 
   def create
-    @vacation_message = VacationMessage.new(user: User.current)
+    @vacation_message = VacationMessage.new(user: @owner, author: User.current)
     @vacation_message.safe_attributes = params[:vacation_message]
     if @vacation_message.save
       flash[:notice] = l(:notice_successful_create)
-      redirect_to vacation_messages_path
+      redirect_to list_path
     else
       render :new
     end
@@ -41,7 +42,7 @@ class VacationMessagesController < ApplicationController
     end
     if saved
       flash[:notice] = l(:notice_successful_update)
-      redirect_to vacation_messages_path
+      redirect_to list_path
     else
       render :edit
     end
@@ -50,18 +51,45 @@ class VacationMessagesController < ApplicationController
   def destroy
     @vacation_message.destroy
     flash[:notice] = l(:notice_successful_delete)
-    redirect_to vacation_messages_path
+    redirect_to list_path
   end
 
   private
+
+  def manager?
+    VacationMessage.manager?(User.current)
+  end
+  helper_method :manager?
 
   def authorize_vacation_messages
     deny_access unless VacationMessage.manageable_by?(User.current)
   end
 
-  # Users only ever see and touch their own absences.
+  # Whose absences are listed or created. Everyone works on their own;
+  # managers may pass user_id (as query parameter or in the form).
+  def find_owner
+    @owner = User.current
+    return unless manager?
+
+    user_id = params[:user_id].presence || params.dig(:vacation_message, :user_id).presence
+    return unless user_id
+
+    @owner = User.active.find_by(id: user_id)
+    render_404 unless @owner
+  end
+
+  # Users only ever see and touch their own absences; managers everyone's.
   def find_vacation_message
-    @vacation_message = VacationMessage.where(user_id: User.current.id).find_by(id: params[:id])
-    render_404 unless @vacation_message
+    scope = manager? ? VacationMessage.all : VacationMessage.where(user_id: User.current.id)
+    @vacation_message = scope.find_by(id: params[:id])
+    if @vacation_message
+      @owner = @vacation_message.user
+    else
+      render_404
+    end
+  end
+
+  def list_path
+    @owner == User.current ? vacation_messages_path : vacation_messages_path(user_id: @owner.id)
   end
 end
