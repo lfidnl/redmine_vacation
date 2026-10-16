@@ -2,7 +2,7 @@ class VacationMessage < ActiveRecord::Base
   include Redmine::SafeAttributes
   include Redmine::I18n
 
-  VISIBILITIES = %w(all logged projects selected).freeze
+  VISIBILITIES = %w(all logged projects project_members selected).freeze
 
   # Presets offered on the form. The first three match Redmine's own flash
   # colours (error / warning / notice).
@@ -18,6 +18,8 @@ class VacationMessage < ActiveRecord::Base
   has_and_belongs_to_many :principals,
                           join_table: 'vacation_messages_principals',
                           association_foreign_key: 'principal_id'
+  has_and_belongs_to_many :projects,
+                          join_table: 'vacation_messages_projects'
 
   validates :user, :date_from, :date_until, :text, presence: true
   validates :text, length: { maximum: 255 }
@@ -25,11 +27,13 @@ class VacationMessage < ActiveRecord::Base
   validates :visibility, inclusion: { in: VISIBILITIES }
   validate  :validate_date_range
   validate  :validate_recipients
+  validate  :validate_projects
 
   before_validation { self.color = color.to_s.strip.downcase }
 
   safe_attributes 'date_from', 'date_until', 'text', 'color', 'visibility',
-                  'show_to_self', 'append_dates', 'principal_ids'
+                  'show_to_self', 'append_dates', 'principal_ids',
+                  'project_ids', 'include_subprojects'
 
   # Plugin labels live under field_vacation_* so they never override core
   # keys such as field_text ("Text field").
@@ -56,7 +60,7 @@ class VacationMessage < ActiveRecord::Base
   def self.displayed_for(viewer)
     active_on(viewer.today)
       .joins(:user).where(users: { status: User::STATUS_ACTIVE })
-      .includes(:user, :principals)
+      .includes(:user, :principals, :projects)
       .sorted
       .select { |message| message.visible_to?(viewer) }
   end
@@ -66,11 +70,39 @@ class VacationMessage < ActiveRecord::Base
     return show_to_self? if viewer.id == user_id
 
     case visibility
-    when 'all'      then true
-    when 'logged'   then viewer.logged?
-    when 'projects' then viewer.logged? && shares_project_with?(viewer)
-    when 'selected' then viewer.logged? && recipient?(viewer)
+    when 'all'             then true
+    when 'logged'          then viewer.logged?
+    when 'projects'        then viewer.logged? && shares_project_with?(viewer)
+    when 'project_members' then viewer.logged? && project_member?(viewer)
+    when 'selected'        then viewer.logged? && recipient?(viewer)
     else false
+    end
+  end
+
+  # The author may only pick projects they can see. Projects already assigned
+  # are kept even if the author lost access in between, so editing the text
+  # does not silently drop them.
+  def project_ids=(ids)
+    ids = Array(ids).reject(&:blank?).map(&:to_i)
+    allowed = Project.visible(user || User.current).where(id: ids).pluck(:id)
+    allowed |= projects.pluck(:id) & ids if persisted?
+    super(ids & allowed)
+  end
+
+  # Ids of the projects whose members see the banner: the selected ones and,
+  # with include_subprojects, all their descendants. Archived projects and
+  # those scheduled for deletion are left out.
+  def target_project_ids
+    selected = projects.to_a
+    return [] if selected.empty?
+
+    scope = Project.where(status: [Project::STATUS_ACTIVE, Project::STATUS_CLOSED])
+    if include_subprojects?
+      table = Project.table_name
+      condition = selected.map { |p| "(#{table}.lft >= #{p.lft.to_i} AND #{table}.rgt <= #{p.rgt.to_i})" }
+      scope.where(condition.join(' OR ')).pluck(:id)
+    else
+      scope.where(id: selected.map(&:id)).pluck(:id)
     end
   end
 
@@ -99,6 +131,11 @@ class VacationMessage < ActiveRecord::Base
      Member.where(user_id: user_id).pluck(:project_id)).any?
   end
 
+  def project_member?(viewer)
+    ids = target_project_ids
+    ids.any? && Member.where(user_id: viewer.id, project_id: ids).exists?
+  end
+
   def recipient?(viewer)
     ids = principal_ids
     ids.include?(viewer.id) || viewer.group_ids.intersect?(ids)
@@ -114,5 +151,11 @@ class VacationMessage < ActiveRecord::Base
     return unless visibility == 'selected' && principal_ids.empty?
 
     errors.add(:base, l(:error_vacation_no_recipients))
+  end
+
+  def validate_projects
+    return unless visibility == 'project_members' && project_ids.empty?
+
+    errors.add(:base, l(:error_vacation_no_projects))
   end
 end

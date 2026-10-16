@@ -33,8 +33,13 @@ class VacationMessagesController < ApplicationController
   end
 
   def update
-    @vacation_message.safe_attributes = params[:vacation_message]
-    if @vacation_message.save
+    # Assigning habtm ids on a persisted record writes the join rows at once,
+    # so roll them back if the record turns out to be invalid.
+    saved = VacationMessage.transaction do
+      @vacation_message.safe_attributes = params[:vacation_message]
+      @vacation_message.save || raise(ActiveRecord::Rollback)
+    end
+    if saved
       flash[:notice] = l(:notice_successful_update)
       redirect_to vacation_messages_path
     else

@@ -71,7 +71,8 @@
     var dateUntil = form.querySelector('#vacation_message_date_until');
     var appendDates = form.querySelector('#vacation_message_append_dates');
     var visibility = form.querySelector('#vacation_message_visibility');
-    var recipients = form.querySelector('.vacation-recipients');
+    var recipients = form.querySelectorAll('.vacation-recipients');
+    var projects = form.querySelectorAll('.vacation-projects');
     var preview = document.querySelector('.vacation-preview');
 
     function updatePreview() {
@@ -85,8 +86,13 @@
       applyColor(preview, color.value);
     }
 
+    function toggle(elements, visible) {
+      elements.forEach(function (el) { el.style.display = visible ? '' : 'none'; });
+    }
+
     function toggleRecipients() {
-      recipients.style.display = visibility.value === 'selected' ? '' : 'none';
+      toggle(recipients, visibility.value === 'selected');
+      toggle(projects, visibility.value === 'project_members');
     }
 
     form.querySelectorAll('.vacation-preset').forEach(function (button) {

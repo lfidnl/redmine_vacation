@@ -34,6 +34,14 @@
           multiple: true, size: 10 %>
     <em class="info"><%= l(:text_vacation_recipients_info) %></em>
   </p>
+  <p class="vacation-projects">
+    <%= f.select :project_ids, vacation_project_options(@vacation_message), {},
+          multiple: true, size: 10 %>
+    <em class="info"><%= l(:text_vacation_projects_info) %></em>
+  </p>
+  <p class="vacation-projects">
+    <%= f.check_box :include_subprojects %>
+  </p>
   <p>
     <%= f.check_box :show_to_self %>
   </p>

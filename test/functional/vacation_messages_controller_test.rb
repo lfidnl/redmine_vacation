@@ -62,6 +62,26 @@ class VacationMessagesControllerTest < Redmine::ControllerTest
     assert_equal 'Geändert', message.reload.text
   end
 
+  def test_create_with_projects
+    project = Project.create!(name: 'Vacation project', identifier: 'vacation-ctrl', is_public: true)
+    post :create, params: { vacation_message: {
+      date_from: '2026-07-24', date_until: '2026-07-24', text: 'X', color: '#ffe3e3',
+      visibility: 'project_members', project_ids: ['', project.id.to_s], include_subprojects: '1'
+    } }
+    assert_redirected_to '/my/vacation_messages'
+    assert_equal [project], VacationMessage.last.projects.to_a
+  end
+
+  def test_invalid_update_keeps_stored_projects
+    project = Project.create!(name: 'Vacation project', identifier: 'vacation-keep', is_public: true)
+    message = create_message(@user, visibility: 'project_members', project_ids: [project.id])
+
+    patch :update, params: { id: message.id, vacation_message: { project_ids: [''], text: 'Y' } }
+    assert_response :success
+    assert_equal [project.id], message.reload.project_ids
+    assert_equal 'Urlaub', message.text
+  end
+
   def test_cannot_edit_or_delete_foreign_message
     message = create_message(@other)
 

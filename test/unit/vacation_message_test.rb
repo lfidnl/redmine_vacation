@@ -59,6 +59,60 @@ class VacationMessageTest < ActiveSupport::TestCase
     assert_not message.visible_to?(@other)
   end
 
+  def test_project_members_requires_projects
+    assert_not build_message(visibility: 'project_members').valid?
+  end
+
+  def test_visibility_project_members_with_and_without_subprojects
+    role   = Role.create!(name: 'Vacation role')
+    parent = Project.create!(name: 'Parent', identifier: 'vacation-parent', is_public: true)
+    child  = Project.create!(name: 'Child', identifier: 'vacation-child', is_public: true)
+    child.set_parent!(parent)
+    Member.create!(project: parent, user: @viewer, roles: [role])
+    Member.create!(project: child,  user: @other,  roles: [role])
+
+    message = build_message(visibility: 'project_members', project_ids: [parent.id],
+                            include_subprojects: true)
+    message.save!
+    assert message.visible_to?(@viewer)
+    assert message.visible_to?(@other)
+
+    message.update!(include_subprojects: false)
+    assert message.visible_to?(@viewer)
+    assert_not message.visible_to?(@other)
+  end
+
+  def test_visibility_project_members_includes_group_members
+    role    = Role.create!(name: 'Vacation role')
+    project = Project.create!(name: 'Grouped', identifier: 'vacation-grouped', is_public: true)
+    group   = Group.create!(lastname: 'Vacation project group')
+    group.users << @other
+    Member.create!(project: project, principal: group, roles: [role])
+
+    message = build_message(visibility: 'project_members', project_ids: [project.id])
+    message.save!
+    assert message.visible_to?(@other)
+  end
+
+  def test_visibility_project_members_ignores_archived_projects
+    role    = Role.create!(name: 'Vacation role')
+    project = Project.create!(name: 'Archived', identifier: 'vacation-archived', is_public: true)
+    Member.create!(project: project, user: @viewer, roles: [role])
+
+    message = build_message(visibility: 'project_members', project_ids: [project.id])
+    message.save!
+    project.archive
+    assert_not message.reload.visible_to?(@viewer)
+  end
+
+  def test_project_ids_drops_projects_invisible_to_author
+    hidden = Project.create!(name: 'Hidden', identifier: 'vacation-hidden', is_public: false)
+    open   = Project.create!(name: 'Open', identifier: 'vacation-open', is_public: true)
+
+    message = build_message(visibility: 'project_members', project_ids: [hidden.id, open.id])
+    assert_equal [open.id], message.project_ids
+  end
+
   def test_displayed_for_only_returns_running_messages
     today = @viewer.today
     running = build_message(date_from: today - 1, date_until: today + 1)

@@ -9,12 +9,14 @@ de:
   label_vacation_visibility_all: "Alle (auch anonyme Besucher)"
   label_vacation_visibility_logged: "Alle angemeldeten Benutzer"
   label_vacation_visibility_projects: "Mitglieder gemeinsamer Projekte"
+  label_vacation_visibility_project_members: "Mitglieder ausgewählter Projekte"
   label_vacation_visibility_selected: "Ausgewählte Benutzer und Gruppen"
   label_vacation_color_red: "Rot"
   label_vacation_color_yellow: "Gelb"
   label_vacation_color_green: "Grün"
   label_vacation_color_blue: "Blau"
   label_vacation_color_grey: "Grau"
+  label_vacation_with_subprojects: "inkl. Unterprojekte"
 
   field_vacation_date_from: "Von"
   field_vacation_date_until: "Bis"
@@ -22,6 +24,8 @@ de:
   field_vacation_color: "Farbe"
   field_vacation_visibility: "Sichtbarkeit"
   field_vacation_principal_ids: "Empfänger"
+  field_vacation_project_ids: "Projekte"
+  field_vacation_include_subprojects: "Unterprojekte einbeziehen"
   field_vacation_show_to_self: "Mir selbst anzeigen"
   field_vacation_append_dates: "Zeitraum anhängen"
 
@@ -29,6 +33,8 @@ de:
   text_vacation_messages_info: "Während einer Abwesenheit wird auf jeder Seite oben ein Hinweis angezeigt – nur für die Personen, die du unter „Sichtbarkeit“ auswählst."
   text_vacation_text_info: "z. B. „Sommerurlaub“. Mit „Zeitraum anhängen“ wird das Datum automatisch ergänzt."
   text_vacation_recipients_info: "Nur bei „Ausgewählte Benutzer und Gruppen“. Mehrfachauswahl mit Strg/Cmd."
+  text_vacation_projects_info: "Nur bei „Mitglieder ausgewählter Projekte“. Mehrfachauswahl mit Strg/Cmd."
   text_vacation_allowed_groups_info: "Wer Abwesenheiten pflegen darf. Keine Auswahl bedeutet: alle angemeldeten Benutzer. Administratoren dürfen immer."
 
   error_vacation_no_recipients: "Bitte mindestens einen Benutzer oder eine Gruppe als Empfänger auswählen."
+  error_vacation_no_projects: "Bitte mindestens ein Projekt auswählen."

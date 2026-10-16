@@ -19,6 +19,8 @@ it also runs on Redmine 6.x.
   - everyone (including anonymous visitors)
   - all logged-in users
   - members of projects you share with the author
+  - members of selected projects, optionally including their subprojects
+    (only projects you can see are offered; archived ones are ignored)
   - selected users and/or groups
 - "Show to myself" - off by default, so you do not see your own banner
 - Tabs "Current & upcoming" / "Past"

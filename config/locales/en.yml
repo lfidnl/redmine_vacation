@@ -9,12 +9,14 @@ en:
   label_vacation_visibility_all: "Everyone (including anonymous)"
   label_vacation_visibility_logged: "All logged-in users"
   label_vacation_visibility_projects: "Members of shared projects"
+  label_vacation_visibility_project_members: "Members of selected projects"
   label_vacation_visibility_selected: "Selected users and groups"
   label_vacation_color_red: "Red"
   label_vacation_color_yellow: "Yellow"
   label_vacation_color_green: "Green"
   label_vacation_color_blue: "Blue"
   label_vacation_color_grey: "Grey"
+  label_vacation_with_subprojects: "incl. subprojects"
 
   field_vacation_date_from: "From"
   field_vacation_date_until: "Until"
@@ -22,6 +24,8 @@ en:
   field_vacation_color: "Colour"
   field_vacation_visibility: "Visibility"
   field_vacation_principal_ids: "Recipients"
+  field_vacation_project_ids: "Projects"
+  field_vacation_include_subprojects: "Include subprojects"
   field_vacation_show_to_self: "Show to myself"
   field_vacation_append_dates: "Append period"
 
@@ -29,6 +33,8 @@ en:
   text_vacation_messages_info: "While an absence is running, a notice is shown at the top of every page - only to the people you pick under \"Visibility\"."
   text_vacation_text_info: "e.g. \"Summer holiday\". With \"Append period\" the dates are added automatically."
   text_vacation_recipients_info: "Only used with \"Selected users and groups\". Ctrl/Cmd for multiple selection."
+  text_vacation_projects_info: "Only used with \"Members of selected projects\". Ctrl/Cmd for multiple selection."
   text_vacation_allowed_groups_info: "Who may maintain absences. No selection means every logged-in user. Administrators always may."
 
   error_vacation_no_recipients: "Please select at least one user or group as recipient."
+  error_vacation_no_projects: "Please select at least one project."
