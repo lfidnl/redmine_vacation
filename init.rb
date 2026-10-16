@@ -1,5 +1,6 @@
 require 'redmine'
 require_relative 'lib/redmine_vacation/hooks'
+require_relative 'lib/redmine_vacation/dashboard_content_patch'
 
 Redmine::Plugin.register :redmine_vacation do
   name        'Vacation Messages'
@@ -7,7 +8,7 @@ Redmine::Plugin.register :redmine_vacation do
   description 'Users maintain their own absences in their account. While an absence ' \
               'is running, a coloured banner, a badge next to the name and a hint ' \
               'when assigning issues inform the audience the user picked.'
-  version     '0.3.0'
+  version     '0.4.0'
   url         'https://github.com/sense-design/redmine_vacation'
   requires_redmine version_or_higher: '6.0.0'
 
@@ -41,4 +42,11 @@ Redmine::Plugin.register :redmine_vacation do
        { controller: 'vacation_overview', action: 'project' },
        caption: :label_vacation_overview,
        param:   :project_id
+end
+
+# Dashboard block for the additionals plugin (welcome and project dashboards).
+Rails.application.config.after_initialize do
+  if Redmine::Plugin.installed?(:additionals) && defined?(DashboardContent)
+    DashboardContent.include RedmineVacation::DashboardContentPatch
+  end
 end

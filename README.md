@@ -38,6 +38,11 @@ it also runs on Redmine 6.x.
   members (permission "View absence overview")
 - **My page block** "Absences": add it via "My page -> Add"; under its
   options pick people via type-ahead, or none for all upcoming absences
+- **Dashboard block** for the [additionals](https://github.com/alphanodes/additionals)
+  plugin: "Add block -> Absence overview" on the welcome dashboard and on
+  project dashboards; pick people in its options, or none for all upcoming
+  absences (on a project dashboard: the members of the project and its
+  subprojects). Several blocks per dashboard are possible
 - **Home page block**: switch on under the plugin settings, optionally
   limited to selected people (none = all upcoming absences)
 - **Managers** (admins and configurable groups) maintain absences for
@@ -95,6 +100,10 @@ end
 ```
 
 ## Tests
+
+The dashboard tests (`test/integration/vacation_dashboard_test.rb`) only run
+when additionals is installed, which needs PostgreSQL or MySQL; without it
+they are skipped.
 
 From the Redmine root:
 

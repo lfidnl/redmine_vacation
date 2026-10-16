@@ -1,0 +1,48 @@
+<%# Dashboard block of the additionals plugin. Locals from additionals:
+    dashboard, settings, block, block_definition, user. Without selected
+    people a project dashboard lists the members of the project and its
+    subprojects, the welcome dashboard everyone. %>
+<%
+  user_ids = VacationMessage.ids_from(settings[:user_ids] || settings['user_ids'])
+  picked   = User.where(id: user_ids).sorted.to_a
+  scope_ids =
+    if user_ids.any?
+      user_ids
+    elsif @project
+      Member.where(project_id: @project.self_and_descendants.select(:id)).distinct.pluck(:user_id)
+    end
+  messages = VacationMessage.listed_for(User.current, user_ids: scope_ids)
+%>
+
+<h3>
+  <%= block_definition[:label] %>
+  <% if picked.any? %>
+    <span class="vacation-block-scope">(<%= picked.map(&:name).join(', ') %>)</span>
+  <% end %>
+</h3>
+
+<% if @can_edit %>
+  <div class="hidden" id="<%= block %>-settings">
+    <%= remote_form_tag _update_layout_setting_dashboard_path(@project, @dashboard) do %>
+      <div class="box tabular settings">
+        <p>
+          <label><%= l(:label_vacation_block_users) %></label>
+          <%= render partial: 'vacation_messages/user_picker',
+                     locals: { name: "settings[#{block}][user_ids]", users: picked } %>
+          <br><em class="info"><%= l(@project ? :text_vacation_dashboard_users_info_project :
+                                                :text_vacation_block_users_info) %></em>
+        </p>
+      </div>
+      <p>
+        <%= submit_tag l(:button_save) %>
+        <%= link_to_function l(:button_cancel), "$('##{block}-settings').toggle()" %>
+      </p>
+    <% end %>
+  </div>
+<% end %>
+
+<% if messages.any? %>
+  <%= render partial: 'vacation_overview/table', locals: { messages: messages } %>
+<% else %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>

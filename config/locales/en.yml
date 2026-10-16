@@ -69,6 +69,7 @@ en:
   text_vacation_manager_groups_info: "Members of these groups may maintain absences for every user, e.g. team leads. Administrators always may."
   text_vacation_hint_days_info: "When assigning an issue, also warn about absences starting within this many days. Default: 14."
   text_vacation_block_users_info: "No selection: all upcoming absences. Only absences the viewer may see are listed."
+  text_vacation_dashboard_users_info_project: "No selection: upcoming absences of the members of this project and its subprojects. Only absences the viewer may see are listed."
 
   error_vacation_no_recipients: "Please select at least one user or group as recipient."
   error_vacation_no_projects: "Please select at least one project."

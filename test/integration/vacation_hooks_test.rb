@@ -132,6 +132,10 @@ class VacationHooksTest < Redmine::IntegrationTest
   end
 
   def test_welcome_block_all_or_selected
+    # With additionals the home page is a dashboard; the hook then only shows
+    # inside its "legacy right" block (see vacation_dashboard_test.rb).
+    skip 'home page is an additionals dashboard' if Redmine::Plugin.installed?(:additionals)
+
     VacationMessage.create!(user: @deputy, date_from: Date.today + 10, date_until: Date.today + 12,
                             text: 'Seminar', color: '#dbeafe', visibility: 'logged')
     with_settings plugin_redmine_vacation: { 'allowed_group_ids' => [], 'welcome_enabled' => '1',

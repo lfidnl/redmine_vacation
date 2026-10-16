@@ -69,6 +69,7 @@ de:
   text_vacation_manager_groups_info: "Mitglieder dieser Gruppen dürfen Abwesenheiten für alle Benutzer pflegen, z. B. Teamleitungen. Administratoren dürfen immer."
   text_vacation_hint_days_info: "Beim Zuweisen eines Tickets wird auch vor Abwesenheiten gewarnt, die innerhalb dieser Anzahl Tage beginnen. Standard: 14."
   text_vacation_block_users_info: "Keine Auswahl: alle anstehenden Abwesenheiten. Es erscheinen nur Abwesenheiten, die der jeweilige Betrachter sehen darf."
+  text_vacation_dashboard_users_info_project: "Keine Auswahl: anstehende Abwesenheiten der Mitglieder dieses Projekts und seiner Unterprojekte. Es erscheinen nur Abwesenheiten, die der jeweilige Betrachter sehen darf."
 
   error_vacation_no_recipients: "Bitte mindestens einen Benutzer oder eine Gruppe als Empfänger auswählen."
   error_vacation_no_projects: "Bitte mindestens ein Projekt auswählen."
