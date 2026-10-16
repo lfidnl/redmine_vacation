@@ -204,24 +204,52 @@
     var recipients = form.querySelectorAll('.vacation-recipients');
     var projects = form.querySelectorAll('.vacation-projects');
     var bannerOptions = form.querySelectorAll('.vacation-banner-options');
-    var preview = form.querySelector('.vacation-preview');
+    var leadDays = field('lead_days');
+    var previews = form.querySelector('.vacation-previews');
+    var leadRow = previews.querySelector('.vacation-preview-lead');
+    var leadInfo = previews.querySelector('.vacation-preview-lead-info');
+    var leadPreview = previews.querySelector('.vacation-preview[data-kind="lead"]');
+    var activePreview = previews.querySelector('.vacation-preview[data-kind="active"]');
 
-    // Mirrors _banner.html.erb: the period is always shown in the lead time.
-    function updatePreview() {
-      var upcoming = dateFrom.value && dateFrom.value > preview.dataset.today;
+    // YYYY-MM-DD minus n days; UTC so DST changes cannot shift the date.
+    function subtractDays(value, n) {
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+      if (!m) return '';
+      var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3] - n));
+      return d.toISOString().slice(0, 10);
+    }
+
+    // Mirrors _banner.html.erb / VacationMessage#banner_text: the lead time
+    // only changes the wording; "append period" applies to both.
+    function bannerLine(lead) {
       var value = text.value;
-      if (appendDates.checked || upcoming) {
-        var p = period(dateFrom.value, dateUntil.value, preview);
+      if (appendDates.checked) {
+        var p = period(dateFrom.value, dateUntil.value, previews);
         if (p) value += ' (' + p + ')';
       }
-      var template = upcoming ? preview.dataset.templateUpcoming : preview.dataset.template;
-      var line = template.replace('%NAME%', preview.dataset.name).replace('%TEXT%', value);
+      var template = lead ? previews.dataset.templateUpcoming : previews.dataset.template;
+      var line = template.replace('%NAME%', previews.dataset.name).replace('%TEXT%', value);
       if (substitute.value) {
-        line += ' - ' + preview.dataset.substituteLabel + ': ' +
+        line += ' - ' + previews.dataset.substituteLabel + ': ' +
                 substitute.options[substitute.selectedIndex].text;
       }
-      preview.textContent = line;
-      applyColor(preview, color.value);
+      return line;
+    }
+
+    function updatePreview() {
+      var days = parseInt(leadDays.value, 10);
+      var hasLead = days > 0;
+
+      leadRow.style.display = hasLead ? '' : 'none';
+      if (hasLead) {
+        leadPreview.textContent = bannerLine(true);
+        applyColor(leadPreview, color.value);
+        var start = formatDate(subtractDays(dateFrom.value, days), previews);
+        leadInfo.textContent = start ? previews.dataset.leadInfo.replace('%DATE%', start) : '';
+      }
+
+      activePreview.textContent = bannerLine(false);
+      applyColor(activePreview, color.value);
     }
 
     function toggle(elements, visible) {
@@ -240,7 +268,7 @@
         updatePreview();
       });
     });
-    [color, text, dateFrom, dateUntil].forEach(function (input) {
+    [color, text, dateFrom, dateUntil, leadDays].forEach(function (input) {
       // "change" as well: the Redmine datepicker sets values programmatically.
       input.addEventListener('input', updatePreview);
       input.addEventListener('change', updatePreview);

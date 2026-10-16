@@ -125,11 +125,16 @@ class VacationMessageTest < ActiveSupport::TestCase
     assert_empty VacationMessage.displayed_for(@viewer)
   end
 
-  def test_banner_text_always_has_period_during_lead_time
+  def test_no_banner_before_start_without_lead_days
     today = @viewer.today
-    message = build_message(date_from: today + 2, date_until: today + 2, append_dates: false)
-    assert_match(/\(/, message.banner_text(today))
-    assert_equal 'Urlaub', message.banner_text(today + 2)
+    build_message(date_from: today + 1, date_until: today + 3, lead_days: 0).save!
+    assert_empty VacationMessage.displayed_for(@viewer)
+  end
+
+  def test_banner_text_follows_append_dates
+    with_period = build_message(append_dates: true)
+    assert_equal "Urlaub (#{with_period.period_text})", with_period.banner_text
+    assert_equal 'Urlaub', build_message(append_dates: false).banner_text
   end
 
   def test_hidden_banner_still_counts_as_absent

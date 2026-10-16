@@ -27,6 +27,8 @@ de:
   label_vacation_status_upcoming:
     one: "Morgen"
     other: "In %{count} Tagen"
+  label_vacation_preview_lead: "Vorschau Vorlauf"
+  label_vacation_preview_active: "Vorschau Abwesenheit"
   label_vacation_lead_short:
     one: "1 Tag vorher"
     other: "%{count} Tage vorher"
@@ -58,6 +60,7 @@ de:
   text_vacation_projects_info: "Nur bei „Mitglieder ausgewählter Projekte“. Mehrfachauswahl mit Strg/Cmd."
   text_vacation_show_banner_info: "Ohne Banner bleibt die Abwesenheit trotzdem in Übersicht, Zuweisungshinweis und Kennzeichen sichtbar."
   text_vacation_lead_days_info: "Banner schon so viele Tage vor Beginn anzeigen. 0 = erst ab dem ersten Tag."
+  text_vacation_preview_lead_info: "So wird das Banner ab %{date} bis zum Vortag angezeigt."
   text_vacation_allowed_groups_info: "Wer eigene Abwesenheiten pflegen darf. Keine Auswahl bedeutet: alle angemeldeten Benutzer. Administratoren dürfen immer."
   text_vacation_manager_groups_info: "Mitglieder dieser Gruppen dürfen Abwesenheiten für alle Benutzer pflegen, z. B. Teamleitungen. Administratoren dürfen immer."
   text_vacation_hint_days_info: "Beim Zuweisen eines Tickets wird auch vor Abwesenheiten gewarnt, die innerhalb dieser Anzahl Tage beginnen. Standard: 14."

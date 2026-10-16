@@ -24,7 +24,7 @@ it also runs on Redmine 6.x.
 - **Banner** on top of every page (optional per absence)
   - colour picker plus presets; border and text colour are derived
   - optional lead time: show the banner X days before the absence starts
-  - optionally append the period to the text (always shown in lead time)
+  - optionally append the period to the text (lead time and absence)
   - each viewer can hide a banner for the rest of the day (stored in the
     browser; comes back when the absence is edited)
 - **Assignee hint**: assigning an issue to someone who is absent, or whose

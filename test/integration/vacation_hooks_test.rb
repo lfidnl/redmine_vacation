@@ -37,6 +37,26 @@ class VacationHooksTest < Redmine::IntegrationTest
     end
   end
 
+  def test_lead_time_banner_follows_append_dates
+    today = Date.today
+    soon = VacationMessage.create!(user: @deputy, date_from: today + 3, date_until: today + 4,
+                                   text: 'Seminar', color: '#dbeafe', visibility: 'logged',
+                                   lead_days: 5, append_dates: false)
+    get '/my/page'
+    assert_select '#vacation-messages .vacation-message', text: /Seminar\s*\z/
+
+    soon.update!(append_dates: true)
+    get '/my/page'
+    assert_select '#vacation-messages .vacation-message', text: /Seminar \(#{Regexp.escape(soon.period_text)}\)/
+  end
+
+  def test_no_banner_before_start_without_lead_time
+    VacationMessage.create!(user: @deputy, date_from: Date.today + 1, date_until: Date.today + 2,
+                            text: 'Morgen', color: '#dbeafe', visibility: 'logged')
+    get '/my/page'
+    assert_select '#vacation-messages .vacation-message', text: /Morgen/, count: 0
+  end
+
   def test_no_banner_when_disabled
     @message.update!(show_banner: false)
     get '/my/page'

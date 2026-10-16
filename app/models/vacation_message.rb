@@ -161,12 +161,10 @@ class VacationMessage < ActiveRecord::Base
     single_day? ? format_date(date_from) : "#{format_date(date_from)} - #{format_date(date_until)}"
   end
 
-  # Text as shown in the banner. The period is always appended while the
-  # banner is shown ahead of the absence, otherwise it would be unclear when
-  # the absence starts.
-  def banner_text(today)
-    show_period = append_dates? || today < date_from
-    show_period ? "#{text} (#{period_text})" : text
+  # Text as shown in the banner, in the lead time as well as during the
+  # absence. append_dates is the only switch for the period.
+  def banner_text
+    append_dates? ? "#{text} (#{period_text})" : text
   end
 
   # One plain-text line for the assignee hint and the badge tooltip.

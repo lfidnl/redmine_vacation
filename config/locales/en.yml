@@ -27,6 +27,8 @@ en:
   label_vacation_status_upcoming:
     one: "Tomorrow"
     other: "In %{count} days"
+  label_vacation_preview_lead: "Preview lead time"
+  label_vacation_preview_active: "Preview absence"
   label_vacation_lead_short:
     one: "1 day ahead"
     other: "%{count} days ahead"
@@ -58,6 +60,7 @@ en:
   text_vacation_projects_info: "Only used with \"Members of selected projects\". Ctrl/Cmd for multiple selection."
   text_vacation_show_banner_info: "Without a banner the absence still shows up in the overview, the assignee hint and the badge."
   text_vacation_lead_days_info: "Show the banner this many days before the absence starts. 0 = from the first day."
+  text_vacation_preview_lead_info: "Shown like this from %{date} until the day before."
   text_vacation_allowed_groups_info: "Who may maintain their own absences. No selection means every logged-in user. Administrators always may."
   text_vacation_manager_groups_info: "Members of these groups may maintain absences for every user, e.g. team leads. Administrators always may."
   text_vacation_hint_days_info: "When assigning an issue, also warn about absences starting within this many days. Default: 14."

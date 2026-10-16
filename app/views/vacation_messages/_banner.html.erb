@@ -10,7 +10,7 @@
                 title="<%= l(:label_vacation_dismiss) %>"
                 aria-label="<%= l(:label_vacation_dismiss) %>">&times;</button>
         <%= l(message.active_on?(today) ? :text_vacation_banner : :text_vacation_banner_upcoming,
-              name: message.user.name, text: message.banner_text(today)) %>
+              name: message.user.name, text: message.banner_text) %>
         <% if message.substitute %>
           - <%= l(:field_vacation_substitute_id) %>: <%= link_to_user message.substitute %>
         <% end %>

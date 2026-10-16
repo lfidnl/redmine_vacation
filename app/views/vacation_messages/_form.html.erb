@@ -74,21 +74,30 @@
       <%= f.number_field :lead_days, min: 0, max: VacationMessage::MAX_LEAD_DAYS, size: 4 %>
       <em class="info"><%= l(:text_vacation_lead_days_info) %></em>
     </p>
-    <p>
-      <label><%= l(:label_preview) %></label>
-      <span class="flash vacation-message vacation-preview"
-            style="<%= @vacation_message.css_style if @vacation_message.color.to_s.match?(/\A#\h{6}\z/) %>"
-            data-name="<%= @vacation_message.user.name %>"
-            data-template="<%= l(:text_vacation_banner, name: '%NAME%', text: '%TEXT%') %>"
-            data-template-upcoming="<%= l(:text_vacation_banner_upcoming, name: '%NAME%', text: '%TEXT%') %>"
-            data-substitute-label="<%= l(:field_vacation_substitute_id) %>"
-            data-today="<%= User.current.today.iso8601 %>"
-            <%# Same format format_date uses, so the preview matches the banner. %>
-            data-date-format="<%= Setting.date_format.presence || ::I18n.t('date.formats.default') %>"
-            data-month-names="<%= ::I18n.t('date.month_names').to_json %>"
-            data-abbr-month-names="<%= ::I18n.t('date.abbr_month_names').to_json %>">
-        <%= l(:text_vacation_banner, name: @vacation_message.user.name, text: @vacation_message.text) %>
-      </span>
-    </p>
+    <%# Two previews: the banner during the lead time (only with lead_days > 0)
+        and during the absence itself, so both can be compared side by side. %>
+    <div class="vacation-previews"
+         data-name="<%= @vacation_message.user.name %>"
+         data-template="<%= l(:text_vacation_banner, name: '%NAME%', text: '%TEXT%') %>"
+         data-template-upcoming="<%= l(:text_vacation_banner_upcoming, name: '%NAME%', text: '%TEXT%') %>"
+         data-lead-info="<%= l(:text_vacation_preview_lead_info, date: '%DATE%') %>"
+         data-substitute-label="<%= l(:field_vacation_substitute_id) %>"
+         <%# Same format format_date uses, so the preview matches the banner. %>
+         data-date-format="<%= Setting.date_format.presence || ::I18n.t('date.formats.default') %>"
+         data-month-names="<%= ::I18n.t('date.month_names').to_json %>"
+         data-abbr-month-names="<%= ::I18n.t('date.abbr_month_names').to_json %>">
+      <p class="vacation-preview-lead">
+        <label><%= l(:label_vacation_preview_lead) %></label>
+        <span class="flash vacation-message vacation-preview" data-kind="lead"></span>
+        <em class="info vacation-preview-lead-info"></em>
+      </p>
+      <p>
+        <label><%= l(:label_vacation_preview_active) %></label>
+        <span class="flash vacation-message vacation-preview" data-kind="active"
+              style="<%= @vacation_message.css_style if @vacation_message.color.to_s.match?(/\A#\h{6}\z/) %>">
+          <%= l(:text_vacation_banner, name: @vacation_message.user.name, text: @vacation_message.text) %>
+        </span>
+      </p>
+    </div>
   </div>
 </fieldset>
