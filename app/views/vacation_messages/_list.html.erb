@@ -1,0 +1,38 @@
+<% messages = tab[:messages] %>
+<% if messages.empty? %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% else %>
+  <div class="autoscroll">
+    <table class="list vacation-messages">
+      <thead>
+        <tr>
+          <th><%= l(:label_vacation_period) %></th>
+          <th><%= l(:field_vacation_text) %></th>
+          <th><%= l(:label_vacation_visible_for) %></th>
+          <th><%= l(:field_vacation_show_to_self) %></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% today = User.current.today %>
+        <% messages.each do |message| %>
+          <tr class="<%= 'vacation-active' if message.date_from <= today && message.date_until >= today %>">
+            <td class="period"><%= vacation_period(message) %></td>
+            <td class="text">
+              <span class="vacation-swatch" style="<%= message.css_style %>"></span>
+              <%= message.text %>
+            </td>
+            <td class="visibility"><%= vacation_visibility_summary(message) %></td>
+            <td class="show-to-self"><%= checked_image message.show_to_self? %></td>
+            <td class="buttons">
+              <%= link_to sprite_icon('edit', l(:button_edit)), edit_vacation_message_path(message), class: 'icon icon-edit' %>
+              <%= link_to sprite_icon('del', l(:button_delete)), vacation_message_path(message),
+                    method: :delete, data: { confirm: l(:text_are_you_sure) },
+                    class: 'icon icon-del' %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

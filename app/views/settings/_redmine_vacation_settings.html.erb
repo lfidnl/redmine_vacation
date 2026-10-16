@@ -1,0 +1,12 @@
+<div class="box tabular">
+  <p>
+    <label><%= l(:label_vacation_allowed_groups) %></label>
+    <%= hidden_field_tag 'settings[allowed_group_ids][]', '', id: nil %>
+    <%= select_tag 'settings[allowed_group_ids][]',
+          options_from_collection_for_select(
+            Group.givable.sorted, :id, :name,
+            Array(@settings['allowed_group_ids']).map(&:to_s)),
+          multiple: true, size: 10 %>
+    <em class="info"><%= l(:text_vacation_allowed_groups_info) %></em>
+  </p>
+</div>

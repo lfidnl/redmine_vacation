@@ -1,0 +1,48 @@
+<%= error_messages_for @vacation_message %>
+
+<div class="box tabular">
+  <p>
+    <%= f.date_field :date_from, required: true, size: 10 %>
+    <%= calendar_for 'vacation_message_date_from' %>
+  </p>
+  <p>
+    <%= f.date_field :date_until, required: true, size: 10 %>
+    <%= calendar_for 'vacation_message_date_until' %>
+  </p>
+  <p>
+    <%= f.text_field :text, required: true, size: 60, maxlength: 255 %>
+    <em class="info"><%= l(:text_vacation_text_info) %></em>
+  </p>
+  <p>
+    <%= f.check_box :append_dates %>
+  </p>
+  <p>
+    <%= f.color_field :color, required: true, class: 'vacation-color' %>
+    <span class="vacation-presets">
+      <% VacationMessage::COLOR_PRESETS.each do |name, hex| %>
+        <button type="button" class="vacation-preset" data-color="<%= hex %>"
+                style="background-color: <%= hex %>;"
+                title="<%= l("label_vacation_color_#{name}") %>"></button>
+      <% end %>
+    </span>
+  </p>
+  <p>
+    <%= f.select :visibility, vacation_visibility_options, {}, class: 'vacation-visibility' %>
+  </p>
+  <p class="vacation-recipients">
+    <%= f.select :principal_ids, vacation_recipient_options(@vacation_message), {},
+          multiple: true, size: 10 %>
+    <em class="info"><%= l(:text_vacation_recipients_info) %></em>
+  </p>
+  <p>
+    <%= f.check_box :show_to_self %>
+  </p>
+</div>
+
+<fieldset class="box">
+  <legend><%= l(:label_preview) %></legend>
+  <div class="flash vacation-message vacation-preview" style="<%= @vacation_message.css_style if @vacation_message.color.to_s.match?(/\A#\h{6}\z/) %>"
+       data-template="<%= l(:text_vacation_banner, name: User.current.name, text: '%TEXT%') %>">
+    <%= l(:text_vacation_banner, name: User.current.name, text: @vacation_message.text) %>
+  </div>
+</fieldset>

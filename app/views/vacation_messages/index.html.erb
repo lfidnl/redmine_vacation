@@ -1,0 +1,17 @@
+<div class="contextual">
+  <%= link_to sprite_icon('add', l(:label_vacation_message_new)), new_vacation_message_path, class: 'icon icon-add' %>
+  <%= link_to sprite_icon('user', l(:label_my_account)), my_account_path, class: 'icon icon-user' %>
+</div>
+
+<h2><%= l(:label_vacation_messages) %></h2>
+
+<p><em class="info"><%= l(:text_vacation_messages_info) %></em></p>
+
+<%= render_tabs [
+      { name: 'upcoming', partial: 'vacation_messages/list',
+        label: :label_vacation_tab_upcoming, messages: @upcoming },
+      { name: 'past', partial: 'vacation_messages/list',
+        label: :label_vacation_tab_past, messages: @past }
+    ] %>
+
+<% html_title l(:label_vacation_messages) %>
