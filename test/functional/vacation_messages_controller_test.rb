@@ -121,6 +121,41 @@ class VacationMessagesControllerTest < Redmine::ControllerTest
     assert_select "input#vacation_message_substitute_id[value=?]", @other.id.to_s
   end
 
+  def test_autocomplete_projects_lists_visible_projects_with_parents
+    parent = Project.create!(name: 'Kunde A', identifier: 'vac-kunde-a', is_public: true)
+    child  = Project.create!(name: 'Relaunch', identifier: 'vac-relaunch', is_public: true)
+    child.set_parent!(parent)
+    Project.create!(name: 'Relaunch geheim', identifier: 'vac-secret', is_public: false)
+
+    get :autocomplete_projects, params: { term: 'relaunch' }
+    assert_response :success
+    result = JSON.parse(response.body)
+    assert_equal [child.id], result.map { |p| p['id'] }
+    assert_equal 'Kunde A » Relaunch', result.first['label']
+  end
+
+  def test_edit_shows_selected_projects_and_recipients_as_chips
+    project = Project.create!(name: 'Kunde B', identifier: 'vac-kunde-b', is_public: true)
+    group = Group.create!(lastname: 'Team Vacation')
+    message = create_message(@user, visibility: 'project_members', project_ids: [project.id])
+    message.update!(principal_ids: [@other.id, group.id])
+
+    get :edit, params: { id: message.id }
+    assert_response :success
+    assert_select '#vacation_message_project_ids .vacation-user-chip', text: /Kunde B/
+    assert_select "#vacation_message_project_ids input[type=hidden][name='vacation_message[project_ids][]'][value='#{project.id}']"
+    assert_select '#vacation_message_principal_ids .vacation-user-chip', 2
+    assert_select '#vacation_message_principal_ids .vacation-user-chip', text: /Team Vacation/
+    assert_select 'select[multiple]', 0
+  end
+
+  def test_update_clearing_recipients_with_only_the_marker
+    message = create_message(@user, visibility: 'selected', principal_ids: [@other.id])
+    patch :update, params: { id: message.id, vacation_message: { visibility: 'logged', principal_ids: [''] } }
+    assert_redirected_to '/my/vacation_messages'
+    assert_empty message.reload.principal_ids
+  end
+
   def test_cannot_edit_or_delete_foreign_message
     message = create_message(@other)
 

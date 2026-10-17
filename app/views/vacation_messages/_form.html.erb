@@ -42,14 +42,20 @@
     <em class="info"><%= l(:text_vacation_visibility_info) %></em>
   </p>
   <p class="vacation-recipients">
-    <%= f.select :principal_ids, vacation_recipient_options(@vacation_message), {},
-          multiple: true, size: 10 %>
-    <em class="info"><%= l(:text_vacation_recipients_info) %></em>
+    <label><%= l(:field_vacation_principal_ids) %></label>
+    <%= render partial: 'vacation_messages/user_picker',
+               locals: { name: 'vacation_message[principal_ids]', id: 'vacation_message_principal_ids',
+                         items: vacation_recipient_items(@vacation_message),
+                         url: vacation_autocomplete_users_path(groups: 1, exclude: @vacation_message.user_id) } %>
+    <br><em class="info"><%= l(:text_vacation_recipients_info) %></em>
   </p>
   <p class="vacation-projects">
-    <%= f.select :project_ids, vacation_project_options(@vacation_message), {},
-          multiple: true, size: 10 %>
-    <em class="info"><%= l(:text_vacation_projects_info) %></em>
+    <label><%= l(:field_vacation_project_ids) %></label>
+    <%= render partial: 'vacation_messages/user_picker',
+               locals: { name: 'vacation_message[project_ids]', id: 'vacation_message_project_ids',
+                         items: vacation_project_items(@vacation_message),
+                         url: autocomplete_projects_vacation_messages_path(user_id: @vacation_message.user_id) } %>
+    <br><em class="info"><%= l(:text_vacation_projects_info) %></em>
   </p>
   <p class="vacation-projects">
     <%= f.check_box :include_subprojects %>

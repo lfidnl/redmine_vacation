@@ -1,16 +1,24 @@
-<%# Multi-person picker: chips with hidden inputs plus a type-ahead field.
-    Locals: name (form field name, without []), users (already selected).
-    The empty hidden input makes "nobody selected" survive a save, because
-    Redmine merges block settings instead of replacing them. %>
-<span class="vacation-user-picker" data-name="<%= name %>[]"
-      data-url="<%= vacation_autocomplete_users_path %>"
+<%# Multi-value picker: chips with hidden inputs plus a type-ahead field.
+    Used for people (My page, dashboards, home page setting) and in the
+    absence form for recipients and projects, where it replaces native
+    multiple selects (unreliable on iOS, and long lists mean scrolling).
+    Locals: name  - form field name without []
+            users - already selected users, or
+            items - already selected [id, label] pairs
+            url   - suggestion endpoint (default: user search)
+            id    - optional id of the picker element
+    The empty hidden input makes "nothing selected" survive a save: Redmine
+    merges block settings, and habtm id writers ignore the blank. %>
+<% items = local_assigns[:items] || users.map { |user| [user.id, user.name] } %>
+<span class="vacation-user-picker"<% if local_assigns[:id] %> id="<%= local_assigns[:id] %>"<% end %> data-name="<%= name %>[]"
+      data-url="<%= local_assigns[:url] || vacation_autocomplete_users_path %>"
       data-remove-label="<%= l(:button_delete) %>">
   <%= hidden_field_tag "#{name}[]", '', id: nil %>
   <span class="vacation-user-chips">
-    <% users.each do |user| %>
-      <span class="vacation-user-chip" data-id="<%= user.id %>">
-        <%= user.name %>
-        <%= hidden_field_tag "#{name}[]", user.id, id: nil %>
+    <% items.each do |item_id, label| %>
+      <span class="vacation-user-chip" data-id="<%= item_id %>">
+        <%= label %>
+        <%= hidden_field_tag "#{name}[]", item_id, id: nil %>
         <button type="button" class="vacation-user-chip-remove"
                 title="<%= l(:button_delete) %>" aria-label="<%= l(:button_delete) %>">&times;</button>
       </span>

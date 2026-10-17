@@ -3,7 +3,7 @@ class VacationMessagesController < ApplicationController
 
   before_action :require_login
   before_action :authorize_vacation_messages
-  before_action :find_owner, only: [:index, :new, :create]
+  before_action :find_owner, only: [:index, :new, :create, :autocomplete_projects]
   before_action :find_vacation_message, only: [:edit, :update, :destroy]
 
   helper :vacation_messages
@@ -52,6 +52,16 @@ class VacationMessagesController < ApplicationController
     @vacation_message.destroy
     flash[:notice] = l(:notice_successful_delete)
     redirect_to list_path
+  end
+
+  # Project search for the visibility "members of selected projects":
+  # projects the absent person can see, labelled with their parents.
+  def autocomplete_projects
+    projects = Project.visible(@owner).like(params[:term].to_s).sorted.limit(20).to_a
+    render json: projects.map { |project|
+      label = VacationMessage.project_label(project)
+      { id: project.id, label: label, value: label }
+    }
   end
 
   private

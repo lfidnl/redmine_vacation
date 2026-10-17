@@ -18,13 +18,24 @@ class VacationOverviewController < ApplicationController
     render :index
   end
 
-  # User search for the substitute field and the person pickers (My page
-  # block, home page setting). Active users the current user may see
-  # (Redmine's users_visibility); +exclude+ drops one id, e.g. the absent
-  # person when picking their substitute.
+  # User search for the substitute field and the pickers (My page block,
+  # dashboards, home page setting, recipients). Active users the current user
+  # may see (Redmine's users_visibility); +exclude+ drops one id, e.g. the
+  # absent person; +groups+ adds groups, marked as such.
   def autocomplete_users
-    users = User.active.visible.like(params[:term].to_s).sorted.limit(20)
+    term = params[:term].to_s
+    users = User.active.visible.like(term).sorted.limit(20)
     users = users.where.not(id: params[:exclude].to_i) if params[:exclude].present?
-    render json: users.map { |u| { id: u.id, label: u.name, value: u.name } }
+    result = users.map { |u| { id: u.id, label: u.name, value: u.name } }
+
+    if params[:groups].present?
+      group_label = l(:label_group)
+      result += Group.givable.like(term).sorted.limit(10).map do |g|
+        label = "#{g.name} (#{group_label})"
+        { id: g.id, label: label, value: label }
+      end
+    end
+
+    render json: result
   end
 end

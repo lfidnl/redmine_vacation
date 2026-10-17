@@ -157,6 +157,12 @@ class VacationMessage < ActiveRecord::Base
     date_from == date_until
   end
 
+  # Labels shared by the pickers' server-rendered chips (helper) and their
+  # suggestions (controllers), so both look the same.
+  def self.project_label(project)
+    project.self_and_ancestors.map(&:name).join(' » ')
+  end
+
   # The texts below live in the model because they are rendered from hooks,
   # where only core helpers are available. format_date and l come from
   # Redmine::I18n.

@@ -62,6 +62,18 @@ class VacationOverviewControllerTest < Redmine::ControllerTest
     assert_not_includes ids, @hidden.id
   end
 
+  def test_autocomplete_users_with_groups
+    group = Group.create!(lastname: 'vac_team')
+    get :autocomplete_users, params: { term: 'vac_', groups: 1 }
+    result = JSON.parse(response.body)
+    entry = result.find { |u| u['id'] == group.id }
+    assert entry
+    assert_match(/vac_team \(/, entry['label'])
+
+    get :autocomplete_users, params: { term: 'vac_' }
+    assert_not_includes JSON.parse(response.body).map { |u| u['id'] }, group.id
+  end
+
   def test_autocomplete_requires_login
     @request.session[:user_id] = nil
     get :autocomplete_users, params: { term: 'vac' }
