@@ -28,14 +28,10 @@ en:
   label_vacation_color_grey: "Grey"
   label_vacation_with_subprojects: "incl. subprojects"
   label_vacation_status_absent: "Absent"
-  label_vacation_status_upcoming:
-    one: "Tomorrow"
-    other: "In %{count} days"
+  label_vacation_status_upcoming: "In %{time}"
   label_vacation_preview_lead: "Preview lead time"
   label_vacation_preview_active: "Preview absence"
-  label_vacation_lead_short:
-    one: "1 day ahead"
-    other: "%{count} days ahead"
+  label_vacation_lead_short: "%{time} ahead"
 
   field_vacation_user: "Person"
   field_vacation_date_from: "From"

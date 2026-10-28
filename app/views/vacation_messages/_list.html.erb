@@ -28,7 +28,7 @@
             <td class="banner">
               <%= checked_image message.show_banner? %>
               <% if message.show_banner? && message.lead_days > 0 %>
-                <span class="vacation-lead"><%= l(:label_vacation_lead_short, count: message.lead_days) %></span>
+                <span class="vacation-lead"><%= l(:label_vacation_lead_short, time: l('datetime.distance_in_words.x_days', count: message.lead_days)) %></span>
               <% end %>
             </td>
             <td class="buttons">

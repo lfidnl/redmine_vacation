@@ -21,8 +21,11 @@
           <td class="text"><%= message.text %></td>
           <td class="substitute"><%= link_to_user(message.substitute) if message.substitute %></td>
           <td class="status">
-            <%= active ? l(:label_vacation_status_absent) :
-                         l(:label_vacation_status_upcoming, count: (message.date_from - today).to_i) %>
+            <% days = (message.date_from - today).to_i %>
+            <%= if active then l(:label_vacation_status_absent)
+                elsif days == 1 then l(:label_tomorrow).capitalize
+                else l(:label_vacation_status_upcoming, time: l('datetime.distance_in_words.x_days', count: days))
+                end %>
           </td>
         </tr>
       <% end %>

@@ -27,6 +27,20 @@ class VacationOverviewControllerTest < Redmine::ControllerTest
     assert_select 'table.vacation-overview td.text', text: 'Secret', count: 0
   end
 
+  def test_index_status_uses_core_day_texts
+    today = User.current.today
+    create_message(@author, text: 'Now')
+    create_message(@author, text: 'Tomorrow', date_from: today + 1, date_until: today + 2)
+    create_message(@author, text: 'Later', date_from: today + 5, date_until: today + 6)
+
+    with_settings default_language: 'en' do
+      get :index
+    end
+    assert_select 'table.vacation-overview td.status', text: 'Absent'
+    assert_select 'table.vacation-overview td.status', text: 'Tomorrow'
+    assert_select 'table.vacation-overview td.status', text: 'In 5 days'
+  end
+
   def test_project_overview_needs_module_and_permission
     project = Project.create!(name: 'Vacation overview', identifier: 'vacation-overview', is_public: false)
     role = Role.create!(name: 'Vacation viewer', permissions: [:view_project, :view_vacation_overview])
